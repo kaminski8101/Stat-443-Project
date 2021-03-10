@@ -1,9 +1,3 @@
 # Stat-443-Project
 
-Kyle
-
-Aayushi
-
-Rosa 
-
-Ruben
+## [Introduction](https://docs.google.com/document/d/1rgp1eXqbazhuiHMVWYs4lUz5CcCC-3WnqOC-b6eynNE/edit)
