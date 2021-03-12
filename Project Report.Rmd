@@ -46,7 +46,7 @@ The goal for this project is to utilize this data set for the purpose of studyin
 
 ## Linear Regression
 
-We will create a multiple linear regression model using all feature variables mentioned in the description of Section 1. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $$\beta$$$ using: 
+We will create a multiple linear regression model using all feature variables mentioned in the description of Section 1. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $$\beta$$ using: 
 
 $$\hat \beta = (X^TX)^{-1}X^Ty$$
 
@@ -56,7 +56,7 @@ Key assumptions are stated as:
 * **L**inearity: can be written as a linear combination of the predictors.
 * **I**ndependence: the errors are independent of each other (not highly correlated).
 * **N**ormality: the distribution of the errors follow a normal distribution.
-* **E**qual Variance: the error variance is the same. (insert source, STAT 420 textbook) 
+* **E**qual Variance: the error variance is the same.^[Dalpiaz David, Applied Statistics in R, https://daviddalpiaz.github.io/appliedstats/model-diagnostics.html] 
 
 
 We will then use model selection using backward BIC to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model. 
