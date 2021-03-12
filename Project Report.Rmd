@@ -46,7 +46,9 @@ The goal for this project is to utilize this data set for the purpose of studyin
 
 ## Linear Regression
 
-We will create a multiple linear regression model using all feature variables mentioned in the description of Section 1. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $beta$ using: 
+We will create a multiple linear regression model using all feature variables mentioned in the description of Section 1. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $$\beta$$$ using: 
+
+$$\hat \beta = (X^TX)^{-1}X^Ty$$
 
 
 Key assumptions are stated as: 
