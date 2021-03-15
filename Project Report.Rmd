@@ -41,6 +41,31 @@ knitr::kable(head(gt_2015)[,])
 
 The goal for this project is to utilize this data set for the purpose of studying flue gas emissions, specifically carbon monoxide(CO) and nitrogen oxides (NOx). Our focus will be to find statistically significant relationships between the ambient and turbine variables and the emissions variables. We will limit the size of our model to more clearly demonstrate these relationships. Ultimately we will suggest which variables make the biggest impact on emission levels in order to decrease emissions overall. 
 
+#Exploratory Data Analysis 
+
+Relationships between feature variables 
+
+Figure 1: Scatterplot Matrices to decide which feature variables have a linear relationship 
+
+```{r}
+pairs(gt_2015, pch = 20, cex = 0.25)
+```
+
+Figure 2: 
+
+```{r}
+knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables")
+```
+
+Remove variables that are highly correlated.
+
+```{r}
+#vif 
+library(faraway)
+model = lm(CO ~ . - NOX - TIT - CDP - TEY, data = gt_2015)
+vif(model)
+```
+
 
 # Methods
 
@@ -49,7 +74,6 @@ The goal for this project is to utilize this data set for the purpose of studyin
 We will create a multiple linear regression model using all feature variables mentioned in the description of Section 1. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $$\beta$$ using: 
 
 $$\hat \beta = (X^TX)^{-1}X^Ty$$
-
 
 Key assumptions are stated as: 
 
@@ -63,4 +87,7 @@ We will then use model selection using backward BIC to tune our model and remove
 
 
 
+```{r}
+
+```
 
