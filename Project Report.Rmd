@@ -146,7 +146,7 @@ cv_5 <- trainControl(method = "cv", number = 5)
 #AIC stepwise selected linear model 
 linear_mod <- train(
           form = CO ~ . - TIT - CDP - TEY- NOX,
-          data = new_gt_2015,
+          data = gt_2015,
           method = "lmStepAIC",
           trControl = cv_5
 )
@@ -154,7 +154,7 @@ linear_mod <- train(
 #Linear log model
 linear_mod_2 <- train(
           form = log(CO) ~ . - TIT - CDP - TEY - NOX,
-          data = new_gt_2015,
+          data = gt_2015,
           method = "lmStepAIC",
           trControl = cv_5,
           nvmax = 10
@@ -163,7 +163,7 @@ linear_mod_2 <- train(
 #Lasso model
 lasso_mod <- train(
           form = CO ~ . - TIT - CDP - TEY - NOX,
-          data = new_gt_2015,
+          data = gt_2015,
           method = "lasso",
           trControl = cv_5
 )
