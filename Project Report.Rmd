@@ -86,8 +86,39 @@ Key assumptions are stated as:
 We will then use model selection using backward BIC to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model. 
 
 
-
 ```{r}
+full_model = lm(CO ~ ., data = gt_2015)
+linear_model = lm(CO ~ .-NOX - TIT - CDP - TEY, data = gt_2015)
+summary(linear_model)
+#picking a new variable to test 
+AT_model = lm(CO ~ AT, data = gt_2015)
+AP_model = lm(CO ~ AP, data = gt_2015)
+AH_model = lm(CO ~ AH, data = gt_2015)
+AFDP_model = lm(CO ~ AFDP, data = gt_2015)
+GTEP_model = lm(CO ~ GTEP, data = gt_2015)
+TAT_model = lm(CO ~ TAT, data = gt_2015)
+BIC(AT_model)
+BIC(AP_model)
+BIC(AH_model)
+BIC(AFDP_model) #second best 
+BIC(GTEP_model)
+BIC(TAT_model)
+BIC(linear_model) #this is the best model 
 
+library(MASS)
+
+n = length(resid(linear_model))
+BIC_model = step(linear_model, direction = "backward", k = log(n))
+coef(BIC_model)
+stepAIC(linear_model, direction = "backward")
+
+vector <- c(BIC(AT_model), BIC(AP_model), BIC(AH_model), BIC(AFDP_model), BIC(GTEP_model), BIC(TAT_model))
+
+library(ggplot2)
+df <- data.frame(vector = c(BIC(AT_model), BIC(AP_model), BIC(AH_model), BIC(AFDP_model), BIC(GTEP_model), BIC(TAT_model)), names = c ("AT", "AP", "AH", "AFDP", "GTEP", "TAT"))
+ggplot(data = df, aes(x = names, y = vector), ylim = c(0, 50000)) + geom_bar(stat = "identity")
+barplot(vector, main = "BIC values", xlab = "Variables",ylab = "Values", names.arg = c("AT", "AP", "AH", "AFDP", "GTEP", "TAT"), col = "gray", ylim = c(0, 45000))
 ```
+
+
 
