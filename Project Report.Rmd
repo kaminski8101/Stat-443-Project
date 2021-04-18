@@ -179,3 +179,131 @@ linear_mod_3 <- train(
 ```
 
 
+## Decision Trees
+```{r load-packages-and-create-RMSE-function}
+# install.packages('tree')
+library(tidyverse)
+library(tree)
+
+RMSE <- function(y, y_hat) {
+  rmse <- sqrt(sum(((y_hat - y)^2)/length(y)))
+  print(rmse)
+}
+```
+```{r train-and-test-split}
+set.seed(1)
+train <- gt_2015 %>% dplyr::select(-NOX) %>% sample_frac(0.8)
+test <- gt_2015 %>% dplyr::select(-NOX) %>% setdiff(train)
+```
+```{r create-big-tree}
+tree_CO <- tree(CO ~ . , train, 
+                  control = tree.control(nobs = length(train$CO), 
+                                         minsize = 2, mindev=0.001), method = "recursive.partition")
+summary(tree_CO)
+```
+```{r plot-big-tree}
+plot(tree_CO)
+text(tree_CO, pretty = 0)
+```
+```{r use-tree-on-test-data-and-calculate-RMSE}
+tree_pred <- predict(tree_CO, test)
+RMSE(test$CO, tree_pred)
+```
+```{r plot-cross-validated-RMSE-against-terminal-node-size}
+cv_info <- cv.tree(tree_CO, FUN = prune.tree) 
+plot(cv_info$size, sqrt(cv_info$dev / nrow(train)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
+```
+```{r prune-tree-to-9-terminal-nodes}
+pruned_tree <- prune.tree(tree_CO, best = 9)
+summary(pruned_tree)
+```
+```{r plot-pruned-tree}
+plot(pruned_tree)
+text(pruned_tree, pretty = 0)
+```
+```{r calculate-pruned-tree-RMSE}
+tree_pred <- predict(pruned_tree, test)
+RMSE(test$CO, tree_pred)
+```
+```{r}
+plot(tree_pred, test$CO, xlab = "Predicted", ylab = "Actual")
+abline(0, 1)
+```
+
+
+
+```{r}
+plot(gt_2015$CO, gt_2015$TEY, ylab = "Total Energy Yield", xlab = "Carbon Monoxide Output")
+abline(v = 17, col = "red")
+```
+```{r}
+data <- gt_2015 %>% mutate(Emissions = as.factor(ifelse(CO > 17, "High", "Low"))) %>% dplyr::select(-NOX)
+high_CO <- data %>% filter(CO > 17) %>% dplyr::select(-CO)
+low_CO <- data %>% dplyr::select(-CO) %>% setdiff(high_CO)
+
+set.seed(1)
+train <- bind_rows(low_CO %>% sample_frac(7/9), high_CO %>% sample_frac(7/9)) 
+test <- data %>% dplyr::select(-CO) %>% setdiff(train)
+```
+```{r}
+tree <- tree(Emissions ~ . , train, 
+                  control = tree.control(nobs = length(train$Emissions), 
+                                         minsize = 1))
+summary(tree)
+```
+```{r}
+plot(tree)
+text(tree, pretty = 0)
+```
+```{r}
+tree_pred <- predict(tree, train, type = "class")
+table(predicted = tree_pred, actual = train$Emissions)
+
+tree_pred <- predict(tree, test, type = "class")
+table(predicted = tree_pred, actual = test$Emissions)
+```
+
+
+
+```{r}
+set.seed(1)
+# train <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% sample_frac(0.8)
+# test <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% setdiff(train)
+train <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% dplyr::select(-c(NOX, TEY, CO)) %>% sample_frac(0.8)
+test <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% dplyr::select(-c(NOX, TEY, CO)) %>% setdiff(train)
+```
+```{r}
+tree_Energy_CO_Ratio <- tree(Energy_CO_Ratio ~ . , train, 
+                  control = tree.control(nobs = length(train$Energy_CO_Ratio), 
+                                         minsize = 2, mindev=0.001), method = "recursive.partition")
+summary(tree_Energy_CO_Ratio)
+```
+```{r}
+plot(tree_Energy_CO_Ratio)
+text(tree_Energy_CO_Ratio, pretty = 0)
+```
+```{r}
+tree_pred <- predict(tree_Energy_CO_Ratio, test)
+RMSE(test$Energy_CO_Ratio, tree_pred)
+```
+```{r}
+cv_info <- cv.tree(tree_Energy_CO_Ratio, FUN = prune.tree) 
+plot(cv_info$size, sqrt(cv_info$dev / nrow(train)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
+```
+```{r}
+pruned_tree <- prune.tree(tree_Energy_CO_Ratio, best = 7)
+summary(pruned_tree)
+```
+```{r}
+plot(pruned_tree)
+text(pruned_tree, pretty = 0)
+```
+```{r}
+tree_pred <- predict(pruned_tree, test)
+RMSE(test$Energy_CO_Ratio, tree_pred)
+```
+```{r}
+plot(tree_pred, test$Energy_CO_Ratio, xlab = "Predicted", ylab = "Actual")
+abline(0, 1)
+```
+
