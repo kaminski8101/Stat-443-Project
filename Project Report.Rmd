@@ -134,7 +134,7 @@ df <- data.frame(vector = c(BIC(AT_model), BIC(AP_model), BIC(AH_model), BIC(AFD
 ggplot(data = df, aes(x = names, y = vector), ylim = c(0, 50000)) + geom_bar(stat = "identity")
 barplot(vector, main = "BIC values", xlab = "Variables",ylab = "Values", names.arg = c("AT", "AP", "AH", "AFDP", "GTEP", "TAT"), col = "gray", ylim = c(0, 45000))
 ```
-###push attempt
+## Linear and Lasso stepwise AIC Models
 ```{r}
 library(caret)
 #simplest linear model 
