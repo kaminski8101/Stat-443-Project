@@ -138,7 +138,7 @@ barplot(vector, main = "BIC values", xlab = "Variables",ylab = "Values", names.a
 ```{r}
 library(caret)
 #simplest linear model 
-simple_linear_model <- lm(CO ~ . - TIT - CDP - TEY, data = gt_2015)
+simple_linear_model <- lm(CO ~ . - TIT - CDP - TEY - NOX, data = gt_2015)
 
 #5-fold cross validation
 cv_5 <- trainControl(method = "cv", number = 5)
@@ -148,7 +148,8 @@ linear_mod <- train(
           form = CO ~ . - TIT - CDP - TEY- NOX,
           data = gt_2015,
           method = "lmStepAIC",
-          trControl = cv_5
+          trControl = cv_5,
+          trace = FALSE
 )
 
 #Linear log model
@@ -157,7 +158,8 @@ linear_mod_2 <- train(
           data = gt_2015,
           method = "lmStepAIC",
           trControl = cv_5,
-          nvmax = 10
+          nvmax = 10,
+          trace = FALSE
 )
 
 #Lasso model
@@ -166,15 +168,6 @@ lasso_mod <- train(
           data = gt_2015,
           method = "lasso",
           trControl = cv_5
-)
-
-#Linear model with 2-way interactions
-linear_mod_3 <- train(
-          form = log(CO) ~ (AT + AP + AH + AFDP + GTEP + TIT + TAT + TEY + CDP)^2,
-          data = gt_2015,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          nvmax = 10
 )
 ```
 
