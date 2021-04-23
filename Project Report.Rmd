@@ -171,6 +171,11 @@ lasso_mod <- train(
 )
 ```
 
+##Linear Model Diagnostic Plots
+```{r}
+
+```
+
 
 ## Decision Trees
 ```{r load-packages-and-create-RMSE-function}
