@@ -26,12 +26,12 @@ The data file `gt_2015.csv` has 7384 observations and 11 variables from the UCI 
 * `AT` - Ambient Temperature
 * `AP` - Ambient Pressure
 * `AH` -  Ambient Humidity
-* `AFDP` - Air filter difference pressure 
-* `GTEP` - Gas turbine exhaust pressure
-* `TIT` - Turbine inlet temperature
-* `TAT` - Turbine after temperature 
-* `TEY` - Turbine energy yield 
-* `CDP` - Compressor discharge pressure
+* `AFDP` - Air Filter Difference Pressure 
+* `GTEP` - Gas Turbine Exhaust Pressure
+* `TIT` - Turbine Inlet Temperature
+* `TAT` - Turbine After Temperature 
+* `TEY` - Turbine Energy Yield 
+* `CDP` - Compressor Discharge Pressure
 
 Here’s a quick peek at the data set: 
 
@@ -183,13 +183,14 @@ barplot(vector, main = "BIC values", xlab = "Variables",ylab = "Values", names.a
 ## Linear and Lasso stepwise AIC Models
 
 ```{r}
+library(caret)
 #5-fold cross validation
 cv_5 <- trainControl(method = "cv", number = 5)
 ```
 
 #All Data
 ```{r}
-library(caret)
+
 
 
 #AIC stepwise selected linear model 
