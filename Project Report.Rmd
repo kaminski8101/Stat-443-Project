@@ -295,6 +295,21 @@ high_log_linear_mod$results
 high_lasso_mod$results
 ```
 
+#plots
+```{r}
+plot(all_linear_mod$finalModel)
+plot(all_log_linear_mod$finalModel)
+plot(all_lasso_mod$finalModel)
+
+plot(typical_linear_mod$finalModel)
+plot(typical_log_linear_mod$finalModel)
+plot(typical_lasso_mod$finalModel)
+
+plot(high_linear_mod$finalModel)
+plot(high_log_linear_mod$finalModel)
+plot(high_lasso_mod$finalModel)
+```
+
 
 ##Linear Model Diagnostic Plots
 ```{r}
