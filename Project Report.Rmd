@@ -318,6 +318,7 @@ plot(high_lasso_mod$finalModel)
 
 
 ## Decision Trees
+#All Data
 ```{r load-packages-and-create-RMSE-function}
 # install.packages('tree')
 library(tidyverse)
@@ -369,7 +370,7 @@ abline(0, 1)
 ```
 
 
-
+#Typical Energy Yield (130-136)
 ```{r}
 set.seed(1)
 train_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% sample_frac(0.8)
@@ -411,7 +412,7 @@ abline(0, 1)
 ```
 
 
-
+#High Energy Yield (160+)
 ```{r train-and-test-split}
 set.seed(1)
 train_high <- gt_2015_high %>% dplyr::select(-NOX) %>% sample_frac(0.8)
@@ -458,7 +459,7 @@ abline(0, 1)
 
 
 
-
+# Tree predicting high vs. low carbon monoxide output
 ```{r}
 plot(gt_2015$CO, gt_2015$TEY, ylab = "Total Energy Yield", xlab = "Carbon Monoxide Output")
 abline(v = 17, col = "red")
@@ -491,7 +492,7 @@ table(predicted = tree_pred, actual = test$Emissions)
 ```
 
 
-
+# Tree predicting ratio of energy yield over carbon monoxide
 ```{r}
 set.seed(1)
 # train <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% sample_frac(0.8)
