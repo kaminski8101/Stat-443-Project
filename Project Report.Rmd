@@ -38,7 +38,7 @@ Here’s a quick peek at the data set:
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 library(readr) 
 gt_2015 <- read_csv("Project Data/gt_2015.csv")
-gt_2015_typical <- gt_2015[gt_2015$TEY <= 136 & gt_2015$TEY >= 130,]
+gt_2015_typical <- gt_2015[gt_2015$TEY <= 133 & gt_2015$TEY >= 127,]
 gt_2015_high <- gt_2015[gt_2015$TEY >= 160,]
 knitr::kable(head(gt_2015)[,])
 knitr::kable(head(gt_2015_typical)[,])
@@ -192,7 +192,7 @@ cv_5 <- trainControl(method = "cv", number = 5)
 ```{r}
 
 
-
+set.seed(10)
 #AIC stepwise selected linear model 
 all_linear_mod <- train(
           form = CO ~ . - NOX - TIT - CDP - TEY ,
@@ -223,6 +223,7 @@ all_lasso_mod <- train(
 
 #Typical Energy Yield (130-136)
 ```{r}
+set.seed(10)
 #AIC stepwise selected linear model 
 typical_linear_mod <- train(
           form = CO ~ . - NOX - TIT - AT,
@@ -253,6 +254,8 @@ typical_lasso_mod <- train(
 
 #High Energy Yield (160+)
 ```{r}
+set.seed(10)
+
 #AIC stepwise selected linear model 
 high_linear_mod <- train(
           form = CO ~ . - NOX - TEY - CDP,
