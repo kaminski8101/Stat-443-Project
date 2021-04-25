@@ -38,13 +38,19 @@ Here’s a quick peek at the data set:
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 library(readr) 
 gt_2015 <- read_csv("Project Data/gt_2015.csv")
+gt_2015_typical <- gt_2015[gt_2015$TEY <= 136 & gt_2015$TEY >= 130,]
+gt_2015_high <- gt_2015[gt_2015$TEY >= 160,]
 knitr::kable(head(gt_2015)[,])
+knitr::kable(head(gt_2015_typical)[,])
+knitr::kable(head(gt_2015_high)[,])
 ```
 
 Here's some descriptive statistics of the data set:
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 summary(gt_2015)
+summary(gt_2015_typical)
+summary(gt_2015_high)
 ```
 
 
@@ -60,12 +66,17 @@ Figure 1: Scatterplot Matrices to decide which feature variables have a linear r
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 pairs(gt_2015, pch = 20, cex = 0.25)
+pairs(gt_2015_typical, pch = 20, cex = 0.25)
+pairs(gt_2015_high, pch = 20, cex = 0.25)
+
 ```
 
 Figure 2: 
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
-knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables")
+knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables (All Data)")
+knitr::kable(cor(gt_201_typical), digits = 2, caption = "Pairwise Correlation Between Variables (Typical Energy Yield)")
+knitr::kable(cor(gt_2015_high), digits = 2, caption = "Pairwise Correlation Between Variables (High Energy Yield)")
 ```
 
 Remove variables that are highly correlated.
@@ -73,8 +84,39 @@ Remove variables that are highly correlated.
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 #vif 
 library(faraway)
-model = lm(CO ~ . - NOX - TIT - CDP - TEY, data = gt_2015)
-vif(model)
+full_model_all     = lm(CO ~ . - NOX, data = gt_2015)
+full_model_typical = lm(CO ~ . - NOX, data = gt_2015_typical)
+full_model_high    = lm(CO ~ . - NOX, data = gt_2015_high)
+
+vif(full_model_all    )
+vif(full_model_typical)
+vif(full_model_high   )
+
+second_model_all     = lm(CO ~ . - NOX - TIT, data = gt_2015)
+second_model_typical = lm(CO ~ . - NOX - TIT, data = gt_2015_typical)
+second_model_high    = lm(CO ~ . - NOX - TEY, data = gt_2015_high)
+
+vif(second_model_all    )
+vif(second_model_typical)
+vif(second_model_high   )
+
+third_model_all     = lm(CO ~ . - NOX - TIT - CDP, data = gt_2015)
+third_model_typical = lm(CO ~ . - NOX - TIT - AT, data = gt_2015_typical)
+third_model_high    = lm(CO ~ . - NOX - TEY - CDP, data = gt_2015_high)
+
+vif(third_model_all    )
+vif(third_model_typical)
+vif(third_model_high   )
+
+initial_typical_linear_model <- third_model_typical
+initial_high_linear_model    <- third_model_high
+
+fourth_model_all     = lm(CO ~ . - NOX - TIT - CDP - TEY, data = gt_2015)
+
+vif(fourth_model_all)
+
+initial_all_linear_model <- fourth_model_all
+
 ```
 
 
