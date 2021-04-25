@@ -88,34 +88,38 @@ full_model_all     = lm(CO ~ . - NOX, data = gt_2015)
 full_model_typical = lm(CO ~ . - NOX, data = gt_2015_typical)
 full_model_high    = lm(CO ~ . - NOX, data = gt_2015_high)
 
-vif(full_model_all    )
-vif(full_model_typical)
-vif(full_model_high   )
+invisible(vif(full_model_all    ))
+invisible(vif(full_model_typical))
+invisible(vif(full_model_high   ))
 
 second_model_all     = lm(CO ~ . - NOX - TIT, data = gt_2015)
 second_model_typical = lm(CO ~ . - NOX - TIT, data = gt_2015_typical)
 second_model_high    = lm(CO ~ . - NOX - TEY, data = gt_2015_high)
 
-vif(second_model_all    )
-vif(second_model_typical)
-vif(second_model_high   )
+invisible(vif(second_model_all    ))
+invisible(vif(second_model_typical))
+invisible(vif(second_model_high   ))
 
 third_model_all     = lm(CO ~ . - NOX - TIT - CDP, data = gt_2015)
 third_model_typical = lm(CO ~ . - NOX - TIT - AT, data = gt_2015_typical)
 third_model_high    = lm(CO ~ . - NOX - TEY - CDP, data = gt_2015_high)
 
-vif(third_model_all    )
-vif(third_model_typical)
-vif(third_model_high   )
+invisible(vif(third_model_all    ))
+invisible(vif(third_model_typical))
+invisible(vif(third_model_high   ))
 
 initial_typical_linear_model <- third_model_typical
 initial_high_linear_model    <- third_model_high
 
 fourth_model_all     = lm(CO ~ . - NOX - TIT - CDP - TEY, data = gt_2015)
 
-vif(fourth_model_all)
+invisible(vif(fourth_model_all))
 
 initial_all_linear_model <- fourth_model_all
+
+vif(initial_all_linear_model)
+vif(initial_typical_linear_model)
+vif(initial_high_linear_model)
 
 ```
 
@@ -177,17 +181,20 @@ ggplot(data = df, aes(x = names, y = vector), ylim = c(0, 50000)) + geom_bar(sta
 barplot(vector, main = "BIC values", xlab = "Variables",ylab = "Values", names.arg = c("AT", "AP", "AH", "AFDP", "GTEP", "TAT"), col = "gray", ylim = c(0, 45000))
 ```
 ## Linear and Lasso stepwise AIC Models
-```{r}
-library(caret)
-#simplest linear model 
-simple_linear_model <- lm(CO ~ . - TIT - CDP - TEY - NOX, data = gt_2015)
 
+```{r}
 #5-fold cross validation
 cv_5 <- trainControl(method = "cv", number = 5)
+```
+
+#All Data
+```{r}
+library(caret)
+
 
 #AIC stepwise selected linear model 
-linear_mod <- train(
-          form = CO ~ . - TIT - CDP - TEY- NOX,
+all_linear_mod <- train(
+          form = CO ~ . - NOX - TIT - CDP - TEY ,
           data = gt_2015,
           method = "lmStepAIC",
           trControl = cv_5,
@@ -195,8 +202,8 @@ linear_mod <- train(
 )
 
 #Linear log model
-linear_mod_2 <- train(
-          form = log(CO) ~ . - TIT - CDP - TEY - NOX,
+all_log_linear_mod <- train(
+          form = log(CO) ~ . - NOX  - TIT - CDP - TEY ,
           data = gt_2015,
           method = "lmStepAIC",
           trControl = cv_5,
@@ -205,13 +212,89 @@ linear_mod_2 <- train(
 )
 
 #Lasso model
-lasso_mod <- train(
-          form = CO ~ . - TIT - CDP - TEY - NOX,
+all_lasso_mod <- train(
+          form = CO ~ . - NOX - TIT - CDP - TEY ,
           data = gt_2015,
           method = "lasso",
           trControl = cv_5
 )
 ```
+
+#Typical Energy Yield (130-136)
+```{r}
+#AIC stepwise selected linear model 
+typical_linear_mod <- train(
+          form = CO ~ . - NOX - TIT - AT,
+          data = gt_2015_typical,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+
+#Linear log model
+typical_log_linear_mod <- train(
+          form = log(CO) ~ . - NOX - TIT - AT,
+          data = gt_2015_typical,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          nvmax = 10,
+          trace = FALSE
+)
+
+#Lasso model
+typical_lasso_mod <- train(
+          form = CO ~ . - NOX - TIT - AT,
+          data = gt_2015_typical,
+          method = "lasso",
+          trControl = cv_5
+)
+```
+
+#High Energy Yield (160+)
+```{r}
+#AIC stepwise selected linear model 
+high_linear_mod <- train(
+          form = CO ~ . - NOX - TEY - CDP,
+          data = gt_2015_high,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+
+#Linear log model
+high_log_linear_mod <- train(
+          form = log(CO) ~ . - NOX - TEY - CDP,
+          data = gt_2015_high,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          nvmax = 10,
+          trace = FALSE
+)
+
+#Lasso model
+high_lasso_mod <- train(
+          form = CO ~ . - NOX - TEY - CDP,
+          data = gt_2015_high,
+          method = "lasso",
+          trControl = cv_5
+)
+```
+
+#Results
+```{r}
+all_linear_mod$results
+all_log_linear_mod$results
+all_lasso_mod$results
+
+typical_linear_mod$results
+typical_log_linear_mod$results
+typical_lasso_mod$results
+
+high_linear_mod$results
+high_log_linear_mod$results
+high_lasso_mod$results
+```
+
 
 ##Linear Model Diagnostic Plots
 ```{r}
