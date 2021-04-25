@@ -75,7 +75,7 @@ Figure 2:
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables (All Data)")
-knitr::kable(cor(gt_201_typical), digits = 2, caption = "Pairwise Correlation Between Variables (Typical Energy Yield)")
+knitr::kable(cor(gt_2015_typical), digits = 2, caption = "Pairwise Correlation Between Variables (Typical Energy Yield)")
 knitr::kable(cor(gt_2015_high), digits = 2, caption = "Pairwise Correlation Between Variables (High Energy Yield)")
 ```
 
@@ -352,6 +352,95 @@ RMSE(test$CO, tree_pred)
 plot(tree_pred, test$CO, xlab = "Predicted", ylab = "Actual")
 abline(0, 1)
 ```
+
+
+
+```{r}
+set.seed(1)
+train_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% sample_frac(0.8)
+test_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% setdiff(train_typical)
+```
+```{r}
+tree_CO_typical <- tree(CO ~ . , train_typical,
+                        control = tree.control(nobs = length(train_typical$CO), 
+                                         minsize = 2, mindev=0.001), method = "recursive.partition")
+summary(tree_CO_typical)
+```
+```{r}
+plot(tree_CO_typical)
+text(tree_CO_typical, pretty = 0)
+```
+```{r}
+tree_pred_typical <- predict(tree_CO_typical, test_typical)
+RMSE(test_typical$CO, tree_pred_typical)
+```
+```{r}
+cv_info_typical <- cv.tree(tree_CO_typical, FUN = prune.tree) 
+plot(cv_info_typical$size, sqrt(cv_info_typical$dev / nrow(train_typical)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
+```
+```{r}
+pruned_tree_typical <- prune.tree(tree_CO_typical, best = 5)
+summary(pruned_tree_typical)
+```
+```{r}
+plot(pruned_tree_typical)
+text(pruned_tree_typical, pretty = 0)
+```
+```{r}
+tree_pred_typical <- predict(pruned_tree_typical, test_typical)
+RMSE(test_typical$CO, tree_pred_typical)
+```
+```{r}
+plot(tree_pred_typical, test_typical$CO, xlab = "Predicted", ylab = "Actual")
+abline(0, 1)
+```
+
+
+
+```{r train-and-test-split}
+set.seed(1)
+train_high <- gt_2015_high %>% dplyr::select(-NOX) %>% sample_frac(0.8)
+test_high <- gt_2015_high %>% dplyr::select(-NOX) %>% setdiff(train_high)
+```
+```{r create-big-tree}
+tree_CO_high <- tree(CO ~ . , train_high,
+                     control = tree.control(nobs = length(train_high$CO), 
+                                         minsize = 2, mindev=0.001), method = "recursive.partition")
+summary(tree_CO_high)
+```
+```{r plot-big-tree}
+plot(tree_CO_high)
+text(tree_CO_high, pretty = 0)
+```
+```{r use-tree-on-test-data-and-calculate-RMSE}
+tree_pred_high <- predict(tree_CO_high, test_high)
+RMSE(test_high$CO, tree_pred_high)
+```
+```{r plot-cross-validated-RMSE-against-terminal-node-size}
+cv_info_high <- cv.tree(tree_CO_high, FUN = prune.tree) 
+plot(cv_info_high$size, sqrt(cv_info_high$dev / nrow(train_high)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
+```
+```{r prune-tree-to-9-terminal-nodes}
+pruned_tree_high <- prune.tree(tree_CO_high, best = 8)
+summary(pruned_tree_high)
+```
+```{r plot-pruned-tree}
+plot(pruned_tree_high)
+text(pruned_tree_high, pretty = 0)
+```
+```{r calculate-pruned-tree-RMSE}
+tree_pred_high <- predict(pruned_tree_high, test_high)
+RMSE(test_high$CO, tree_pred_high)
+```
+```{r}
+plot(tree_pred_high, test_high$CO, xlab = "Predicted", ylab = "Actual")
+abline(0, 1)
+```
+
+
+
+
+
 
 
 
