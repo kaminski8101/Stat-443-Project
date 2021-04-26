@@ -334,14 +334,14 @@ RMSE <- function(y, y_hat) {
 }
 ```
 ```{r train-and-test-split}
-set.seed(1)
+set.seed(10)
 train <- gt_2015 %>% dplyr::select(-NOX) %>% sample_frac(0.8)
 test <- gt_2015 %>% dplyr::select(-NOX) %>% setdiff(train)
 ```
 ```{r create-big-tree}
 tree_CO <- tree(CO ~ . , train, 
                   control = tree.control(nobs = length(train$CO), 
-                                         minsize = 2, mindev=0.001), method = "recursive.partition")
+                                         minsize = 4, mindev=0.001), method = "recursive.partition")
 summary(tree_CO)
 ```
 ```{r plot-big-tree}
@@ -356,8 +356,8 @@ RMSE(test$CO, tree_pred)
 cv_info <- cv.tree(tree_CO, FUN = prune.tree) 
 plot(cv_info$size, sqrt(cv_info$dev / nrow(train)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
 ```
-```{r prune-tree-to-9-terminal-nodes}
-pruned_tree <- prune.tree(tree_CO, best = 9)
+```{r prune-tree-to-11-terminal-nodes}
+pruned_tree <- prune.tree(tree_CO, best = 11)
 summary(pruned_tree)
 ```
 ```{r plot-pruned-tree}
@@ -376,7 +376,7 @@ abline(0, 1)
 
 #Typical Energy Yield (130-136)
 ```{r}
-set.seed(1)
+set.seed(10)
 train_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% sample_frac(0.8)
 test_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% setdiff(train_typical)
 ```
@@ -418,7 +418,7 @@ abline(0, 1)
 
 #High Energy Yield (160+)
 ```{r train-and-test-split}
-set.seed(1)
+set.seed(10)
 train_high <- gt_2015_high %>% dplyr::select(-NOX) %>% sample_frac(0.8)
 test_high <- gt_2015_high %>% dplyr::select(-NOX) %>% setdiff(train_high)
 ```
@@ -441,7 +441,7 @@ cv_info_high <- cv.tree(tree_CO_high, FUN = prune.tree)
 plot(cv_info_high$size, sqrt(cv_info_high$dev / nrow(train_high)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
 ```
 ```{r prune-tree-to-9-terminal-nodes}
-pruned_tree_high <- prune.tree(tree_CO_high, best = 8)
+pruned_tree_high <- prune.tree(tree_CO_high, best = 6)
 summary(pruned_tree_high)
 ```
 ```{r plot-pruned-tree}
@@ -473,7 +473,7 @@ data <- gt_2015 %>% mutate(Emissions = as.factor(ifelse(CO > 17, "High", "Low"))
 high_CO <- data %>% filter(CO > 17) %>% dplyr::select(-CO)
 low_CO <- data %>% dplyr::select(-CO) %>% setdiff(high_CO)
 
-set.seed(1)
+set.seed(10)
 train <- bind_rows(low_CO %>% sample_frac(7/9), high_CO %>% sample_frac(7/9)) 
 test <- data %>% dplyr::select(-CO) %>% setdiff(train)
 ```
@@ -498,7 +498,7 @@ table(predicted = tree_pred, actual = test$Emissions)
 
 # Tree predicting ratio of energy yield over carbon monoxide
 ```{r}
-set.seed(1)
+set.seed(10)
 # train <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% sample_frac(0.8)
 # test <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% setdiff(train)
 train <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% dplyr::select(-c(NOX, TEY, CO)) %>% sample_frac(0.8)
