@@ -1,5 +1,5 @@
 ---
-title: "Gas Turbine CO and NOx Emission Analysis"
+title: "Gas Turbine CO Emission Analysis"
 author: "Aayushi Gupta, Kyle Kaminski, Rosa Lin, Ruben Martinez"
 date: ""
 output: pdf_document
@@ -417,38 +417,38 @@ abline(0, 1)
 
 
 #High Energy Yield (160+)
-```{r train-and-test-split}
+```{r train-and-test-split-high}
 set.seed(10)
 train_high <- gt_2015_high %>% dplyr::select(-NOX) %>% sample_frac(0.8)
 test_high <- gt_2015_high %>% dplyr::select(-NOX) %>% setdiff(train_high)
 ```
-```{r create-big-tree}
+```{r create-big-tree-high}
 tree_CO_high <- tree(CO ~ . , train_high,
                      control = tree.control(nobs = length(train_high$CO), 
                                          minsize = 2, mindev=0.001), method = "recursive.partition")
 summary(tree_CO_high)
 ```
-```{r plot-big-tree}
+```{r plot-big-tree-high}
 plot(tree_CO_high)
 text(tree_CO_high, pretty = 0)
 ```
-```{r use-tree-on-test-data-and-calculate-RMSE}
+```{r use-tree-on-test-data-and-calculate-RMSE-high}
 tree_pred_high <- predict(tree_CO_high, test_high)
 RMSE(test_high$CO, tree_pred_high)
 ```
-```{r plot-cross-validated-RMSE-against-terminal-node-size}
+```{r plot-cross-validated-RMSE-against-terminal-node-size-high}
 cv_info_high <- cv.tree(tree_CO_high, FUN = prune.tree) 
 plot(cv_info_high$size, sqrt(cv_info_high$dev / nrow(train_high)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
 ```
-```{r prune-tree-to-9-terminal-nodes}
+```{r prune-tree-to-6-terminal-nodes-high}
 pruned_tree_high <- prune.tree(tree_CO_high, best = 6)
 summary(pruned_tree_high)
 ```
-```{r plot-pruned-tree}
+```{r plot-pruned-tree-high}
 plot(pruned_tree_high)
 text(pruned_tree_high, pretty = 0)
 ```
-```{r calculate-pruned-tree-RMSE}
+```{r calculate-pruned-tree-RMSE-high}
 tree_pred_high <- predict(pruned_tree_high, test_high)
 RMSE(test_high$CO, tree_pred_high)
 ```
