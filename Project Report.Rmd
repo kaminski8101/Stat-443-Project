@@ -127,6 +127,13 @@ vif(initial_high_linear_model)
 
 Exploratory analysis shows possible linear relationships between the response variable CO and the feature variables CDP, TEY, TIT, GTEP and AFDP. Collinearity between some of the feature variables (TIT, CDP, and TEY) could cause some problems in our analysis and will likely lead to the removal of the redundant variables. 
 
+#density 
+```{r}
+d <- density(gt_2015$TEY)
+plot(d, xlab = "Carbon Monoxide", ylab = "Density", main = "Carbon Monoxide Distribution")
+polygon(d, col = "blue4", border = "chocolate1")
+abline(v = c(127,133,160), lty = c(1,1,2), col = c("red","red","black"))
+```
 
 # Methods
 
