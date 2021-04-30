@@ -130,7 +130,7 @@ Exploratory analysis shows possible linear relationships between the response va
 #density 
 ```{r}
 d <- density(gt_2015$TEY)
-plot(d, xlab = "Carbon Monoxide", ylab = "Density", main = "Carbon Monoxide Distribution")
+plot(d, xlab = "Turbine Energy Yield", ylab = "Density", main = "Turbnine Energy Yield Distribution")
 polygon(d, col = "blue4", border = "chocolate1")
 abline(v = c(127,133,160), lty = c(1,1,2), col = c("red","red","black"))
 ```
