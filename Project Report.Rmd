@@ -148,7 +148,7 @@ Key assumptions are stated as:
 * **L**inearity: can be written as a linear combination of the predictors.
 * **I**ndependence: the errors are independent of each other (not highly correlated).
 * **N**ormality: the distribution of the errors follow a normal distribution.
-* **E**qual Variance: the error variance is the same.^[Dalpiaz David, Applied Statistics in R, https://daviddalpiaz.github.io/appliedstats/model-diagnostics.html] 
+* **E**qual Variance: the error variance is the same.^[Dalpiaz David, Applied Statistics in R, https://urldefense.com/v3/__https://daviddalpiaz.github.io/appliedstats/model-diagnostics.html__;!!DZ3fjg!pZQU6uJCClJrohh1D9pa0MjKMi32lYqIPLCJl_vX4wq1QtzWTjyE-7kqGzwyrgx2FQEo$ ] 
 
 
 We will then use model selection using backward BIC to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model. 
