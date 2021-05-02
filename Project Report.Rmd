@@ -291,8 +291,16 @@ high_lasso_mod <- train(
 )
 ```
 
+
+#Box-Cox
+
+```{r}
+
+```
+
+
 #Results
-```{r include=FALSE}
+```{r }
 all_linear_mod$results
 all_log_linear_mod$results
 all_lasso_mod$results
@@ -307,20 +315,60 @@ high_lasso_mod$results
 ```
 
 #plots
-```{r include=FALSE}
+```{r }
 plot(all_linear_mod$finalModel)
 plot(all_log_linear_mod$finalModel)
-plot(all_lasso_mod$finalModel)
+#plot(all_lasso_mod$finalModel)
 
 plot(typical_linear_mod$finalModel)
 plot(typical_log_linear_mod$finalModel)
-plot(typical_lasso_mod$finalModel)
+#plot(typical_lasso_mod$finalModel)
 
 plot(high_linear_mod$finalModel)
 plot(high_log_linear_mod$finalModel)
-plot(high_lasso_mod$finalModel)
+#plot(high_lasso_mod$finalModel)
 ```
 
+#Outlier Search
+```{r}
+plot(cooks.distance(all_linear_mod$finalModel))
+plot(cooks.distance(all_log_linear_mod$finalModel))
+
+
+plot(cooks.distance(typical_linear_mod$finalModel))
+plot(cooks.distance(typical_log_linear_mod$finalModel))
+
+
+plot(cooks.distance(high_linear_mod$finalModel))
+plot(cooks.distance(high_log_linear_mod$finalModel))
+
+
+
+which(cooks.distance(all_linear_mod$finalModel) > .05)
+which(cooks.distance(all_log_linear_mod$finalModel) > .04)
+
+
+which(cooks.distance(typical_linear_mod$finalModel) > .05)
+which(cooks.distance(typical_log_linear_mod$finalModel) > .04)
+
+
+which(cooks.distance(high_linear_mod$finalModel) > .05)
+which(cooks.distance(high_log_linear_mod$finalModel) >.04)
+
+
+
+
+which(cooks.distance(all_linear_mod$finalModel) > 4/nrow(gt_2015))
+which(cooks.distance(all_log_linear_mod$finalModel) > 4/nrow(gt_2015))
+
+
+which(cooks.distance(typical_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
+which(cooks.distance(typical_log_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
+
+
+which(cooks.distance(high_linear_mod$finalModel) > 4/nrow(gt_2015_high))
+which(cooks.distance(high_log_linear_mod$finalModel) > 4/nrow(gt_2015_high))
+```
 
 ##Linear Model Diagnostic Plots
 ```{r}
