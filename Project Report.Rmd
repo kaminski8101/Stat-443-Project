@@ -127,6 +127,13 @@ vif(initial_high_linear_model)
 
 Exploratory analysis shows possible linear relationships between the response variable CO and the feature variables CDP, TEY, TIT, GTEP and AFDP. Collinearity between some of the feature variables (TIT, CDP, and TEY) could cause some problems in our analysis and will likely lead to the removal of the redundant variables. 
 
+#density 
+```{r}
+d <- density(gt_2015$TEY)
+plot(d, xlab = "Turbine Energy Yield", ylab = "Density", main = "Turbnine Energy Yield Distribution")
+polygon(d, col = "blue4", border = "chocolate1")
+abline(v = c(127,133,160), lty = c(1,1,2), col = c("red","red","black"))
+```
 
 # Methods
 
@@ -147,7 +154,7 @@ Key assumptions are stated as:
 We will then use model selection using backward BIC to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model. 
 
 
-```{r}
+```{r include=FALSE}
 full_model = lm(CO ~ ., data = gt_2015)
 linear_model = lm(CO ~ .-NOX - TIT - CDP - TEY, data = gt_2015)
 summary(linear_model)
@@ -182,14 +189,14 @@ barplot(vector, main = "BIC values", xlab = "Variables",ylab = "Values", names.a
 ```
 ## Linear and Lasso stepwise AIC Models
 
-```{r}
+```{r include=FALSE}
 library(caret)
 #5-fold cross validation
 cv_5 <- trainControl(method = "cv", number = 5)
 ```
 
 #All Data
-```{r}
+```{r include=FALSE}
 
 
 set.seed(10)
@@ -222,7 +229,7 @@ all_lasso_mod <- train(
 ```
 
 #Typical Energy Yield (130-136)
-```{r}
+```{r include=FALSE}
 set.seed(10)
 #AIC stepwise selected linear model 
 typical_linear_mod <- train(
@@ -253,7 +260,7 @@ typical_lasso_mod <- train(
 ```
 
 #High Energy Yield (160+)
-```{r}
+```{r include=FALSE}
 set.seed(10)
 
 #AIC stepwise selected linear model 
@@ -285,7 +292,7 @@ high_lasso_mod <- train(
 ```
 
 #Results
-```{r}
+```{r include=FALSE}
 all_linear_mod$results
 all_log_linear_mod$results
 all_lasso_mod$results
@@ -300,7 +307,7 @@ high_lasso_mod$results
 ```
 
 #plots
-```{r}
+```{r include=FALSE}
 plot(all_linear_mod$finalModel)
 plot(all_log_linear_mod$finalModel)
 plot(all_lasso_mod$finalModel)
