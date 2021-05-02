@@ -300,7 +300,7 @@ typical_bc_linear_mod <- train(
           trace = FALSE
 )
 typical_bc_linear_mod_lm <- lm(CO^(-.1) ~ AP + AH + AFDP + GTEP + TAT + TEY + CDP, data = gt_2015_typical)
-
+plot(typical_bc_linear_mod$finalModel)
 
 #High Data Box-Cox Transformed Linear Model
 high_bc_linear_mod <- train(
@@ -312,6 +312,7 @@ high_bc_linear_mod <- train(
           trace = FALSE
 )
 high_bc_linear_mod_lm <- lm(CO^(1.9) ~ AT + AFDP + GTEP + TIT + TAT, data =  gt_2015_high)
+plot(typical_bc_linear_mod$finalModel)
 ```
 
 
