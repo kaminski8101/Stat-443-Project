@@ -279,6 +279,7 @@ high_lambda <- boxcox(high_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(hig
 #Box-Cox Transformed Models
 ```{r}
 #All Data Box-Cox Transformed Linear Model
+set.seed(10)
 all_bc_linear_mod <- train(
           form = CO^(.1) ~ . - NOX  - TIT - CDP - TEY ,
           data = gt_2015,
