@@ -320,73 +320,168 @@ plot(typical_bc_linear_mod$finalModel)
 #Results
 ```{r }
 all_linear_mod$results
-all_log_linear_mod$results
+all_bc_linear_mod$results
 all_lasso_mod$results
 
 typical_linear_mod$results
-typical_log_linear_mod$results
+typical_bc_linear_mod$results
 typical_lasso_mod$results
 
 high_linear_mod$results
-high_log_linear_mod$results
+high_bc_linear_mod$results
 high_lasso_mod$results
 ```
 
 #plots
 ```{r }
 plot(all_linear_mod$finalModel)
-plot(all_log_linear_mod$finalModel)
+plot(all_bc_linear_mod$finalModel)
 #plot(all_lasso_mod$finalModel)
 
 plot(typical_linear_mod$finalModel)
-plot(typical_log_linear_mod$finalModel)
+plot(typical_bc_linear_mod$finalModel)
 #plot(typical_lasso_mod$finalModel)
 
 plot(high_linear_mod$finalModel)
-plot(high_log_linear_mod$finalModel)
+plot(high_bc_linear_mod$finalModel)
 #plot(high_lasso_mod$finalModel)
 ```
 
 #Outlier Search
 ```{r}
 plot(cooks.distance(all_linear_mod$finalModel))
-plot(cooks.distance(all_log_linear_mod$finalModel))
+plot(cooks.distance(all_bc_linear_mod$finalModel))
 
 
 plot(cooks.distance(typical_linear_mod$finalModel))
-plot(cooks.distance(typical_log_linear_mod$finalModel))
+plot(cooks.distance(typical_bc_linear_mod$finalModel))
 
 
 plot(cooks.distance(high_linear_mod$finalModel))
-plot(cooks.distance(high_log_linear_mod$finalModel))
+plot(cooks.distance(high_bc_linear_mod$finalModel))
 
 
 
 which(cooks.distance(all_linear_mod$finalModel) > .05)
-which(cooks.distance(all_log_linear_mod$finalModel) > .04)
+which(cooks.distance(all_bc_linear_mod$finalModel) > .04)
 
 
 which(cooks.distance(typical_linear_mod$finalModel) > .05)
-which(cooks.distance(typical_log_linear_mod$finalModel) > .04)
+which(cooks.distance(typical_bc_linear_mod$finalModel) > .04)
 
 
 which(cooks.distance(high_linear_mod$finalModel) > .05)
-which(cooks.distance(high_log_linear_mod$finalModel) >.04)
+which(cooks.distance(high_bc_linear_mod$finalModel) >.04)
 
 
 
 
 which(cooks.distance(all_linear_mod$finalModel) > 4/nrow(gt_2015))
-which(cooks.distance(all_log_linear_mod$finalModel) > 4/nrow(gt_2015))
+which(cooks.distance(all_bc_linear_mod$finalModel) > 4/nrow(gt_2015))
 
 
 which(cooks.distance(typical_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
-which(cooks.distance(typical_log_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
+which(cooks.distance(typical_bc_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
 
 
 which(cooks.distance(high_linear_mod$finalModel) > 4/nrow(gt_2015_high))
-which(cooks.distance(high_log_linear_mod$finalModel) > 4/nrow(gt_2015_high))
+which(cooks.distance(high_bc_linear_mod$finalModel) > 4/nrow(gt_2015_high))
 ```
+
+#Outlier Removal
+```{r}
+outlier_removed_gt_2015 <- gt_2015[which(cooks.distance(all_linear_mod$finalModel) < .05),]
+outlier_removed_gt_2015_typical <- gt_2015[which(cooks.distance(typical_linear_mod$finalModel) < .05),]
+outlier_removed_gt_2015_high <- gt_2015[which(cooks.distance(high_linear_mod$finalModel) < .05),]
+```
+
+#Refitting Models
+```{r}
+or_full_model_all     = lm(CO ~ . - NOX, data = outlier_removed_gt_2015)
+or_full_model_typical = lm(CO ~ . - NOX, data = outlier_removed_gt_2015_typical)
+or_full_model_high    = lm(CO ~ . - NOX, data = outlier_removed_gt_2015_high)
+
+(vif(or_full_model_all    ))
+(vif(or_full_model_typical))
+(vif(or_full_model_high   ))
+
+or_second_model_all     = lm(CO ~ . - NOX - TIT, data = outlier_removed_gt_2015)
+or_second_model_typical = lm(CO ~ . - NOX - TIT, data = outlier_removed_gt_2015_typical)
+or_second_model_high    = lm(CO ~ . - NOX - CDP, data = outlier_removed_gt_2015_high)
+
+(vif(or_second_model_all    ))
+(vif(or_second_model_typical))
+(vif(or_second_model_high   ))
+
+or_third_model_all     = lm(CO ~ . - NOX - TIT - CDP, data = outlier_removed_gt_2015)
+or_third_model_typical = lm(CO ~ . - NOX - TIT - CDP, data = outlier_removed_gt_2015_typical)
+or_third_model_high    = lm(CO ~ . - NOX - CDP - TEY, data = outlier_removed_gt_2015_high)
+
+(vif(or_third_model_all    ))
+(vif(or_third_model_typical))
+(vif(or_third_model_high   ))
+
+or_fourth_model_all     = lm(CO ~ . - NOX - TIT - CDP - TEY, data = outlier_removed_gt_2015)
+or_fourth_model_typical = lm(CO ~ . - NOX - TIT - CDP - AFDP, data = outlier_removed_gt_2015_typical)
+or_fourth_model_high    = lm(CO ~ . - NOX - CDP - TEY - AFDP, data = outlier_removed_gt_2015_high)
+
+(vif(or_fourth_model_all    ))
+(vif(or_fourth_model_typical))
+(vif(or_fourth_model_high   ))
+
+or_initial_model_all <- lm(CO ~ . - NOX - TIT - CDP - TEY, data = outlier_removed_gt_2015)
+
+or_fifth_model_typical = lm(CO ~ . - NOX - TIT - CDP - AFDP - GTEP, data = outlier_removed_gt_2015_typical)
+or_fifth_model_high    = lm(CO ~ . - NOX - CDP - TEY - AFDP - GTEP, data = outlier_removed_gt_2015_high)
+
+(vif(or_fifth_model_typical))
+(vif(or_fifth_model_high   ))
+
+or_initial_model_typical = lm(CO ~ . - NOX - TIT - CDP - AFDP - GTEP, data = outlier_removed_gt_2015_typical)
+or_initial_model_high    = lm(CO ~ . - NOX - CDP - TEY - AFDP - GTEP, data = outlier_removed_gt_2015_high)
+```
+
+```{r}
+set.seed(10)
+#AIC stepwise selected linear model 
+or_all_linear_mod <- train(
+          form = CO ~ . - NOX - TIT - CDP - TEY ,
+          data = outlier_removed_gt_2015,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+or_all_linear_mod_lm <- lm(CO ~ AT + AP + AH + AFDP + GTEP + TAT, data = gt_2015)
+
+
+#AIC stepwise selected linear model 
+or_typical_linear_mod <- train(
+          form = CO ~ . - NOX - TIT - CDP - AFDP - GTEP,
+          data = outlier_removed_gt_2015_typical,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+or_typical_linear_mod_lm <- lm(CO ~ AT + AP + AH + TAT + TEY, data = gt_2015)
+
+
+#AIC stepwise selected linear model 
+or_high_linear_mod <- train(
+          form = CO ~ . - NOX - CDP - TEY - AFDP - GTEP,
+          data = outlier_removed_gt_2015_high,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+or_high_linear_mod_lm <- lm(CO ~ AT + AP + AH + TIT + TAT, data = gt_2015)
+```
+
+```{r}
+plot(or_all_linear_mod$finalModel)
+plot(or_typical_linear_mod$finalModel)
+plot(or_high_linear_mod$finalModel)
+```
+
 
 ##Linear Model Diagnostic Plots
 ```{r}
