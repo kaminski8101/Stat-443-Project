@@ -208,16 +208,8 @@ all_linear_mod <- train(
           trControl = cv_5,
           trace = FALSE
 )
+all_linear_mod_lm <- lm(CO ~ AT + AH + AFDP + GTEP + TAT, data = gt_2015)
 
-#Linear log model
-all_log_linear_mod <- train(
-          form = log(CO) ~ . - NOX  - TIT - CDP - TEY ,
-          data = gt_2015,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          nvmax = 10,
-          trace = FALSE
-)
 
 #Lasso model
 all_lasso_mod <- train(
@@ -239,16 +231,8 @@ typical_linear_mod <- train(
           trControl = cv_5,
           trace = FALSE
 )
+typical_linear_mod_lm <- lm(CO ~ AP + AH + AFDP + GTEP + TAT + TEY + CDP, data = gt_2015_typical)
 
-#Linear log model
-typical_log_linear_mod <- train(
-          form = log(CO) ~ . - NOX - TIT - AT,
-          data = gt_2015_typical,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          nvmax = 10,
-          trace = FALSE
-)
 
 #Lasso model
 typical_lasso_mod <- train(
@@ -271,16 +255,8 @@ high_linear_mod <- train(
           trControl = cv_5,
           trace = FALSE
 )
+high_linear_mod_lm <- lm(CO ~ AT + AFDP + GTEP + TIT + TAT, data =  gt_2015_high)
 
-#Linear log model
-high_log_linear_mod <- train(
-          form = log(CO) ~ . - NOX - TEY - CDP,
-          data = gt_2015_high,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          nvmax = 10,
-          trace = FALSE
-)
 
 #Lasso model
 high_lasso_mod <- train(
@@ -292,10 +268,51 @@ high_lasso_mod <- train(
 ```
 
 
-#Box-Cox
+#Box-Cox Lambdas
 
 ```{r}
+all_lambda <- boxcox(all_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(all_linear_mod_lm, plotit = FALSE)$y)]
+typical_lambda <- boxcox(typical_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(typical_linear_mod_lm, plotit = FALSE)$y)]
+high_lambda <- boxcox(high_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(high_linear_mod_lm, plotit = FALSE)$y)]
+```
 
+#Box-Cox Transformed Models
+```{r}
+#All Data Box-Cox Transformed Linear Model
+all_bc_linear_mod <- train(
+          form = CO^(.1) ~ . - NOX  - TIT - CDP - TEY ,
+          data = gt_2015,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          nvmax = 10,
+          trace = FALSE
+)
+all_bc_linear_mod_lm <- lm(CO^(.1) ~ AT + AP + AH + AFDP + GTEP + TAT, data = gt_2015)
+plot(all_bc_linear_mod$finalModel)
+
+#Typical Data Box-Cox Transformed Linear Model
+typical_bc_linear_mod <- train(
+          form = CO^(-.1) ~ . - NOX - TIT - AT,
+          data = gt_2015_typical,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          nvmax = 10,
+          trace = FALSE
+)
+typical_bc_linear_mod_lm <- lm(CO^(-.1) ~ AP + AH + AFDP + GTEP + TAT + TEY + CDP, data = gt_2015_typical)
+plot(typical_bc_linear_mod$finalModel)
+
+#High Data Box-Cox Transformed Linear Model
+high_bc_linear_mod <- train(
+          form = CO^(1.9) ~ . - NOX - TEY - CDP,
+          data = gt_2015_high,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          nvmax = 10,
+          trace = FALSE
+)
+high_bc_linear_mod_lm <- lm(CO^(1.9) ~ AT + AFDP + GTEP + TIT + TAT, data =  gt_2015_high)
+plot(typical_bc_linear_mod$finalModel)
 ```
 
 
