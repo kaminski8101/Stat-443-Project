@@ -187,18 +187,18 @@ df <- data.frame(vector = c(BIC(AT_model), BIC(AP_model), BIC(AH_model), BIC(AFD
 ggplot(data = df, aes(x = names, y = vector), ylim = c(0, 50000)) + geom_bar(stat = "identity")
 barplot(vector, main = "BIC values", xlab = "Variables",ylab = "Values", names.arg = c("AT", "AP", "AH", "AFDP", "GTEP", "TAT"), col = "gray", ylim = c(0, 45000))
 ```
-## Linear and Lasso stepwise AIC Models
 
+
+## Linear and Lasso stepwise AIC Models
 ```{r include=FALSE}
 library(caret)
 #5-fold cross validation
 cv_5 <- trainControl(method = "cv", number = 5)
 ```
 
+
 #All Data
 ```{r include=FALSE}
-
-
 set.seed(10)
 #AIC stepwise selected linear model 
 all_linear_mod <- train(
@@ -220,7 +220,7 @@ all_lasso_mod <- train(
 )
 ```
 
-#Typical Energy Yield (130-136)
+#Typical Energy Yield (127-133)
 ```{r include=FALSE}
 set.seed(10)
 #AIC stepwise selected linear model 
@@ -269,7 +269,6 @@ high_lasso_mod <- train(
 
 
 #Box-Cox Lambdas
-
 ```{r}
 all_lambda <- boxcox(all_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(all_linear_mod_lm, plotit = FALSE)$y)]
 typical_lambda <- boxcox(typical_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(typical_linear_mod_lm, plotit = FALSE)$y)]
@@ -320,78 +319,59 @@ plot(typical_bc_linear_mod$finalModel)
 #Results
 ```{r }
 all_linear_mod$results
-all_log_linear_mod$results
 all_lasso_mod$results
 
 typical_linear_mod$results
-typical_log_linear_mod$results
 typical_lasso_mod$results
 
 high_linear_mod$results
-high_log_linear_mod$results
 high_lasso_mod$results
 ```
 
 #plots
 ```{r }
 plot(all_linear_mod$finalModel)
-plot(all_log_linear_mod$finalModel)
 #plot(all_lasso_mod$finalModel)
 
 plot(typical_linear_mod$finalModel)
-plot(typical_log_linear_mod$finalModel)
 #plot(typical_lasso_mod$finalModel)
 
 plot(high_linear_mod$finalModel)
-plot(high_log_linear_mod$finalModel)
 #plot(high_lasso_mod$finalModel)
 ```
 
 #Outlier Search
 ```{r}
-plot(cooks.distance(all_linear_mod$finalModel))
-plot(cooks.distance(all_log_linear_mod$finalModel))
+# plot(cooks.distance(all_linear_mod$finalModel))
+# plot(cooks.distance(typical_linear_mod$finalModel))
+# plot(cooks.distance(high_linear_mod$finalModel))
+# 
+# 
+# which(cooks.distance(all_linear_mod$finalModel) > .05)
+# which(cooks.distance(typical_linear_mod$finalModel) > .05)
+# which(cooks.distance(high_linear_mod$finalModel) > .05)
+# 
+# 
+# which(cooks.distance(all_linear_mod$finalModel) > 4/nrow(gt_2015))
+# which(cooks.distance(typical_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
+# which(cooks.distance(high_linear_mod$finalModel) > 4/nrow(gt_2015_high))
 
 
-plot(cooks.distance(typical_linear_mod$finalModel))
-plot(cooks.distance(typical_log_linear_mod$finalModel))
+plot(cooks.distance(all_bc_linear_mod$finalModel))
+plot(cooks.distance(typical_bc_linear_mod$finalModel))
+plot(cooks.distance(high_bc_linear_mod$finalModel))
 
 
-plot(cooks.distance(high_linear_mod$finalModel))
-plot(cooks.distance(high_log_linear_mod$finalModel))
+which(cooks.distance(all_bc_linear_mod$finalModel) > .05)
+which(cooks.distance(typical_bc_linear_mod$finalModel) > .05)
+which(cooks.distance(high_bc_linear_mod$finalModel) > .05)
 
 
-
-which(cooks.distance(all_linear_mod$finalModel) > .05)
-which(cooks.distance(all_log_linear_mod$finalModel) > .04)
-
-
-which(cooks.distance(typical_linear_mod$finalModel) > .05)
-which(cooks.distance(typical_log_linear_mod$finalModel) > .04)
-
-
-which(cooks.distance(high_linear_mod$finalModel) > .05)
-which(cooks.distance(high_log_linear_mod$finalModel) >.04)
-
-
-
-
-which(cooks.distance(all_linear_mod$finalModel) > 4/nrow(gt_2015))
-which(cooks.distance(all_log_linear_mod$finalModel) > 4/nrow(gt_2015))
-
-
-which(cooks.distance(typical_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
-which(cooks.distance(typical_log_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
-
-
-which(cooks.distance(high_linear_mod$finalModel) > 4/nrow(gt_2015_high))
-which(cooks.distance(high_log_linear_mod$finalModel) > 4/nrow(gt_2015_high))
+which(cooks.distance(all_bc_linear_mod$finalModel) > 4/nrow(gt_2015))
+which(cooks.distance(typical_bc_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
+which(cooks.distance(high_bc_linear_mod$finalModel) > 4/nrow(gt_2015_high))
 ```
 
-##Linear Model Diagnostic Plots
-```{r}
-
-```
 
 
 ## Decision Trees
@@ -447,7 +427,7 @@ abline(0, 1)
 ```
 
 
-#Typical Energy Yield (130-136)
+#Typical Energy Yield (127-133)
 ```{r}
 set.seed(10)
 train_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% sample_frac(0.8)
@@ -529,6 +509,7 @@ RMSE(test_high$CO, tree_pred_high)
 plot(tree_pred_high, test_high$CO, xlab = "Predicted", ylab = "Actual")
 abline(0, 1)
 ```
+
 
 
 
