@@ -238,11 +238,11 @@ Since we were able to anticipate variables that could cause some problems in our
 
 ## Model Selection 
 
-We decided to examine three different models to make sure that the model we selected was the most useful and effective way of analyzing the data set. The three models we used were **Multiple Linear Regression**, **Lasso**, and **Decision Trees**. 
+To accurately identify the process variables that impact carbon monoxide emissions, we decided to examine three different models to make sure that the model we selected was the most useful and effective way of analyzing the data set. The three models we used were **Multiple Linear Regression**, **Lasso**, and **Decision Trees**. 
 
 ### RMSE
 
-In order to determine which model was the most effective, we compared the RMSE of multiple linear regression, lasso, and decision tree models. Root Mean Squared Errors are the standard deviation of residuals. Residuals are a measure of the distance between the predicted and actual values. The point of calculating the RMSE is to measure how spread out these variables are. The rule of thumb is, the lower the RMSE, the better. 
+In order to determine which model was the most effective, we compared the RMSE of multiple linear regression, lasso, and decision tree models. Root Mean Squared Errors are the standard deviation of residuals. The point of calculating the RMSE is to measure how spread out these variables are. The rule of thumb is, the lower the RMSE, the better. 
 
 ### Training and Testing Data
 
@@ -269,19 +269,12 @@ high_lass_rmse    <- max(high_lasso_mod$results$RMSE)
 all_tree_rmse     <- RMSE(test_all$CO, tree_pred_all)
 typical_tree_rmse <- RMSE(test_typical$CO, tree_pred_typical)
 high_tree_rmse    <- RMSE(test_high$CO, tree_pred_high)
-
-bc_all_rmse     <- all_bc_linear_mod$results$RMSE
-bc_typical_rmse <- typical_bc_linear_mod$results$RMSE
-bc_high_rmse    <- high_bc_linear_mod$results$RMSE
 ```
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 RMSE_Table <- matrix(c(round(all_linear_mod$results$RMSE        ,digits = 4),
                        round(typical_linear_mod$results$RMSE    ,digits = 4),
                        round(high_linear_mod$results$RMSE       ,digits = 4),
-                       round(all_bc_linear_mod$results$RMSE     ,digits = 4),
-                       round(typical_bc_linear_mod$results$RMSE ,digits = 4),
-                       round(high_bc_linear_mod$results$RMSE    ,digits = 4),
                        round(max(all_lasso_mod$results$RMSE)    ,digits = 4),
                        round(max(typical_lasso_mod$results$RMSE),digits = 4),
                        round(max(high_lasso_mod$results$RMSE)   ,digits = 4),
@@ -290,7 +283,7 @@ RMSE_Table <- matrix(c(round(all_linear_mod$results$RMSE        ,digits = 4),
                        round(high_tree_rmse                     ,digits = 4 )), 
                        ncol=3, byrow=TRUE)
 colnames(RMSE_Table) <- c("Overall Production Range", "Typical Production Range (127-134.5)", "High Production Range (160+)")
-rownames(RMSE_Table) <- c("Linear Regression", "Box-Cox Transformed", "Lasso", "Decision Tree" )
+rownames(RMSE_Table) <- c("Linear Regression", "Lasso", "Decision Tree" )
 RMSE_Table <- kable(as.table(RMSE_Table))
 RMSE_Table
 ```
@@ -303,7 +296,7 @@ RMSE_Table
 \caption{Overall Production Range Decision Tree}
 \end{figure}
 
-The decision tree above represents our final tree model that was trained on the entire data set supplied to us. The first split the tree made was on the turbine inlet temperatures, separating observations where the TIT was less than 1048.75 to the left and the remaining observations to the right. If we observe all of the terminal nodes on each side of the tree after this first split, it is clear that the higher TIT values resulted in lower CO values with the exception of 1 observation where the CO output was very high at 25.26. This value is an anomaly and we do believe it to be a result of incorrect data entry (maybe it should have been 2.526), or some equipment malfunction (see section 5). Just like the TIT values, It is also observed that higher TAT, AT, and AFDP values also result in lower CO output as well. 
+The decision tree above represents our final tree model that was trained on the entire data set supplied to us. The first split the tree made was on the turbine inlet temperatures, separating observations where the TIT was less than 1048.75 to the left and the remaining observations to the right. If we observe all of the terminal nodes on each side of the tree after this first split, it is clear that the higher TIT values resulted in lower CO values with the exception of 1 observation where the CO output was very high at 25.26. This value is an anomaly and we do believe it to be a result of incorrect data entry (maybe it should have been 2.526), or some equipment malfunction (see section 5). Similar to the TIT values, it is also observed that higher TAT, AT, and AFDP values also resulted in lower CO output as well. 
 
 
 ## Typical Decision Tree Model 
@@ -337,11 +330,18 @@ The table above shows us the single correlations between CO and the explanatory 
 
 ### Ambient Temperature Plots
 
-**----- ADD FIGURE 6 HERE -----**
+```{r}
+model = lm(gt_2015$AT ~ gt_2015$TEY)
+ggplot(model, aes(x = gt_2015$TEY, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Total Energy Yield") + labs(y = "Ambient Temperature") + labs(title = "Figure 6: Relationship between Total Energy Yield and Ambient Temperature")
+```
 
-**----- ADD FIGURE 7 HERE -----**
+```{r}
+model2 = lm(gt_2015$AT ~ gt_2015$CO)
+ggplot(model, aes(x = gt_2015$CO, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Carbon Monoxide") + labs(y = "Ambient Temperature") + labs(title = "Figure 7: Relationship between Carbon Monoxide and Ambient Temperature")
+```
 
-The plots above help further explain the why higher AT result in lower CO outputs. The plot on top shows no clear trend with TEY values less than around 145, but a clear negative trend when the TEY values are above 145. This argues that the extreme TEY values are impacted by AT, likely because at very high temperatures the machines can’t work as hard or they will overheat. The plot on the bottom shows AT against CO, where we see 9 CO values greater than 17 whereas the other 7300 observations are less. 
+
+The plots above help further explain the why higher AT result in lower CO outputs. The plot on top shows no clear trend with TEY values less than around 145, but a clear negative trend when the TEY values are above 145. This argues that the extreme TEY values are impacted by AT, likely because at very high temperatures the machines can not work as hard or they will overheat. The plot on the bottom shows AT against CO, where we see 9 CO values greater than 17 whereas the other 7300 observations are less. 
 
 \newpage
 
@@ -354,12 +354,12 @@ Based on our results, the following variables are the most sensitive process var
 * NA
 * NA
 
-Based on our results, the following variables are the most sensitive process variables for the typical production range:
+Based on our results, the following variables are the most sensitive process variables for the typical production range (127 - 134.5):
 
 * NA
 * NA
 
-Based on our results, the following variables are the most sensitive process variables for the high production range:
+Based on our results, the following variables are the most sensitive process variables for the high production range (160+):
 
 * NA
 * NA
@@ -373,6 +373,30 @@ As you can see...
 \newpage
 
 # Appendix
+
+## Multiple Linear Regression
+
+We will create a multiple linear regression model using the feature variables remaining after preparing our data -- AT, AP, AH, AFDP, GTEP, and TAT. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $\beta$ using:
+
+$$\hat{\beta} = (X^TX)^{-1}X$$
+[[**Source**]](https://daviddalpiaz.github.io/appliedstats/simple-linear-regression.html)
+
+Key assumptions are stated as: 
+
+* **L**inearity: can be written as a linear combination of the predictors.
+* **I**ndependence: the errors are independent of each other (not highly correlated).
+* **N**ormality: the distribution of the errors follow a normal distribution.
+* **E**qual Variance: the error variance is the same. 
+
+We will then use model selection using VIF to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model.
+
+
+
+## Lasso 
+
+The Lasso model is similar in structure to the linear model, but it differs in how the variable selection process is treated. Lasso models often perform better than a simple/multiple linear regression because the Lasso model can penalize unimportant variables by shrinking their corresponding coefficients, which decreases the influence those variables have on the model. This is preferable over the linear regression model because the variance can be decreased without largely impacting the model’s bias.
+
+$$\sum_{i=1}^{n} \Big(y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{ij}\Big)^2 + \lambda \sum_{j=1}^{p} |\beta_j|$$
 
 ## Variance Inflation Factor (VIF)
 
@@ -432,29 +456,7 @@ vif(initial_high_linear_model)
 ```
 
 
-## Multiple Linear Regression
 
-We will create a multiple linear regression model using the feature variables remaining after preparing our data -- AT, AP, AH, AFDP, GTEP, and TAT. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $\beta$ using:
-
-$$\hat{\beta} = (X^TX)^{-1}X$$
-[[**Source**]](https://daviddalpiaz.github.io/appliedstats/simple-linear-regression.html)
-
-Key assumptions are stated as: 
-
-* **L**inearity: can be written as a linear combination of the predictors.
-* **I**ndependence: the errors are independent of each other (not highly correlated).
-* **N**ormality: the distribution of the errors follow a normal distribution.
-* **E**qual Variance: the error variance is the same. 
-
-We will then use model selection using VIF to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model.
-
-
-
-## Lasso 
-
-The Lasso model is similar in structure to the linear model, but it differs in how the variable selection process is treated. Lasso models often perform better than a simple/multiple linear regression because the Lasso model can penalize unimportant variables by shrinking their corresponding coefficients, which decreases the influence those variables have on the model. This is preferable over the linear regression model because the variance can be decreased without largely impacting the model’s bias.
-
-$$\sum_{i=1}^{n} \Big(y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{ij}\Big)^2 + \lambda \sum_{j=1}^{p} |\beta_j|$$
 
 [[**Source**]](https://statisticallearning.org/regularization.html)
 
