@@ -494,6 +494,54 @@ plot(or_typical_linear_mod$finalModel)
 plot(or_high_linear_mod$finalModel)
 ```
 
+#Outlier Removed Box-Cox Lambdas
+```{r}
+or_all_lambda <- boxcox(or_all_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(or_all_linear_mod_lm, plotit = FALSE)$y)]
+or_typical_lambda <- boxcox(or_typical_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(or_typical_linear_mod_lm, plotit = FALSE)$y)]
+or_high_lambda <- boxcox(or_high_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(or_high_linear_mod_lm, plotit = FALSE)$y)]
+```
+
+#Outlier Removed Box-Cox Transformed Models
+```{r}
+#All Data Box-Cox Transformed Linear Model
+set.seed(10)
+or_all_bc_linear_mod <- train(
+          form = CO^(.1) ~ . - NOX - TIT - CDP - TEY ,
+          data = outlier_removed_gt_2015,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+or_all_bc_linear_mod_lm <- lm(CO ~ AT + AP + AH + AFDP + GTEP + TAT, data = outlier_removed_gt_2015)
+
+
+#AIC stepwise selected linear model 
+or_typical_bc_linear_mod <- train(
+          form = CO^(.2) ~ . - NOX - TIT - CDP - AFDP - GTEP,
+          data = outlier_removed_gt_2015_typical,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+or_bc_typical_linear_mod_lm <- lm(CO ~AT + AP + TAT + TEY, data = outlier_removed_gt_2015_typical)
+
+
+#AIC stepwise selected linear model 
+or_high_bc_linear_mod <- train(
+          form = CO^(.2) ~ . - NOX - CDP - TEY - AFDP - GTEP,
+          data = outlier_removed_gt_2015_high,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+or_high_bc_linear_mod_lm <- lm(CO ~ AT + AP + TIT + TAT, data = outlier_removed_gt_2015_high)
+```
+
+```{r}
+plot(or_all_bc_linear_mod$finalModel)
+plot(or_typical_bc_linear_mod$finalModel)
+plot(or_high_bc_linear_mod$finalModel)
+```
 
 ##Linear Model Diagnostic Plots
 ```{r}
