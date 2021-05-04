@@ -88,7 +88,7 @@ knitr::kable(head(gt_2015)[,])
 # Methods
 
 ```{r include=FALSE}
-set.seed(10)
+set.seed(443)
 # Set 5-fold cross validation
 cv_5 <- trainControl(method = "cv", number = 5)
 
