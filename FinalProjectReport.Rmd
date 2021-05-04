@@ -304,12 +304,6 @@ This decision tree represents our final tree model that was built on the high pr
 
 ## Tree Model Explanations 
 
-### Carbon Monoxide Correlations
-
-**----- ADD TABLE 6 HERE -----**
-
-The table above shows us the single correlations between CO and the explanatory variables that were used in the tree model splits. We found it surprising that high TIT, TAT, and AT resulted in lower CO outputs as we would think that cooler temperatures would result in more efficient energy production. The correlation table does show us that TIT and AT both have negative correlations with CO, meaning as one increases the other decreases. This supports the arguments made in our tree models. TAT has an almost 0 correlation with CO according to the data, which does not agree or disagree with our models since the TAT splits were always after other splits.
-
 ### Ambient Temperature Plots
 
 ```{r,  message=FALSE, echo=FALSE, warning=FALSE}
