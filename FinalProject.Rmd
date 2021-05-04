@@ -36,7 +36,7 @@ The data comes from a gas turbine located in Turkey that studies the flue gas em
 
 ### Description 
 
-The data file gt_2015.csv has 7384 observations and 11 variables from the UCI Gas Turbine CO and NOx Emission Data Set. We are going to explore and analyze the following variables (more details in Appendices 1): 
+The data file `gt_2015.csv` has 7384 observations and 11 variables from the UCI Gas Turbine CO and NOx Emission Data Set. We are going to explore and analyze the following variables (more details in Appendices 1): 
 
 * AT - Ambient Temperature
 * AP - Ambient Pressure
@@ -54,31 +54,54 @@ The data file gt_2015.csv has 7384 observations and 11 variables from the UCI Ga
 
 Here’s a quick peek at the data set:
 
-**----- ADD TABLE HERE -----**
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+library(readr) 
+gt_2015 <- read_csv("Project Data/gt_2015.csv")
+gt_2015_typical <- gt_2015[gt_2015$TEY <= 133 & gt_2015$TEY >= 127,]
+gt_2015_high <- gt_2015[gt_2015$TEY >= 160,]
+knitr::kable(head(gt_2015)[,])
+```
 
 \newpage
 
-# Exploratory Data Analysis 
+# Methods
 
-## Pairwise Correlations 
+## Exploratory Data Analysis 
 
-**----- ADD TABLE 1 HERE -----**
+### Pairwise Correlations 
 
-**----- ADD TABLE 2 HERE -----**
+&nbsp;
+&nbsp;
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+pairs(gt_2015, pch = 20, cex = 0.25, main = "Figure 1: Pairwise Correlation Plot")
+```
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables")
+```
 
 The exploratory analysis shows possible linear relationships between the response variable CO and the feature variables CDP, TEY, TIT, GTEP and AFDP. The analysis also indicates possible collinearity between some of the feature variables (TIT, CDP, and TEY). This could cause some problems in our analysis and will likely lead to the removal of the redundant variables. 
 
 
-## Carbon Monoxide Distribution
+### Carbon Monoxide Distribution
 
 The client provided us a set of production ranges to analyze. An overall production range that analyzes all of the data points from the carbon monoxide emission output, a typical production range which looks at data points from 130 to 136, and a high production range that looks at data points higher than 160. 
 
-**----- ADD FIGURE 1 HERE -----**
+&nbsp;
+&nbsp;
 
-The typical production range the client provided did not fully capture the typical production range that we observed in our data sample (see Figure 1 above). This could be a result of the data values from the 2015 data set having lower values compared to other data sets. Therefore, we decided to shift the typical production range to 127 to 133 given that it is a better representation of the typical production range of the carbon monoxide emission output. 
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+d = density(gt_2015$TEY)
+plot(d, xlab = "Turbine Energy Yield", ylab = "Density", main = "Figure 2: Turbine Energy Yield Distribution")
+polygon(d, col = "blue4", border = "chocolate1")
+abline(v = c(127,133,160), lty = c(1,1,2), col = c("red","red","black"))
+```
+
+The typical production range the client provided did not fully capture the typical production range that we observed in our data sample (see Figure 2 above). This could be a result of the data values from the 2015 data set having lower values compared to other data sets. Therefore, we decided to shift the typical production range to 127 to 133 given that it is a better representation of the typical production range of the carbon monoxide emission output. 
 
 
-## Data Preparation 
+### Data Preparation 
 
 The first step to preparing the data was to remove the response variable nitrogen oxide, since our analysis solely focuses on carbon monoxide emissions. 
 
@@ -127,6 +150,22 @@ This decision tree represents our final tree model that was trained on the typic
 
 And finally, this decision tree represents our final tree model that was built on the high production range data with TEY values over 160. This tree argues that higher AFDP values on average result in lower CO output because the average value of the nodes on the right side is lower than those on the left. Unlike our previous models, AT does not show a very strong relationship with the CO output values. Higher TEY and AH values look to have lower CO outputs. 
 
+## Tree Model Explanations 
+
+### Carbon Monoxide Correlations
+
+**----- ADD TABLE 6 HERE -----**
+
+The table above shows us the single correlations between CO and the explanatory variables that were used in the tree model splits. We found it surprising that high TIT, TAT, and AT resulted in lower CO outputs as we would think that cooler temperatures would result in more efficient energy production. The correlation table does show us that TIT and AT both have negative correlations with CO, meaning as one increases the other decreases. This supports the arguments made in our tree models. TAT has an almost 0 correlation with CO according to the data, which does not agree or disagree with our models since the TAT splits were always after other splits.
+
+### Ambient Temperature Plots
+
+**----- ADD FIGURE 6 HERE -----**
+
+**----- ADD FIGURE 7 HERE -----**
+
+The plots above help further explain the why higher AT result in lower CO outputs. The plot on top shows no clear trend with TEY values less than around 145, but a clear negative trend when the TEY values are above 145. This argues that the extreme TEY values are impacted by AT, likely because at very high temperatures the machines can’t work as hard or they will overheat. The plot on the bottom shows AT against CO, where we see 9 CO values greater than 17 whereas the other 7300 observations are less. 
+
 
 \newpage
 
@@ -136,17 +175,103 @@ And finally, this decision tree represents our final tree model that was built o
 
 Variance Inflation Factor detects multicollinearity in regression analysis. Multicollinearity is when the correlation between predictors affects regression results. We only used VIF in our linear based models.
 
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+library(faraway)
+full_model_all     = lm(CO ~ . - NOX, data = gt_2015)
+full_model_typical = lm(CO ~ . - NOX, data = gt_2015_typical)
+full_model_high    = lm(CO ~ . - NOX, data = gt_2015_high)
+
+invisible(vif(full_model_all    ))
+invisible(vif(full_model_typical))
+invisible(vif(full_model_high   ))
+
+second_model_all     = lm(CO ~ . - NOX - TIT, data = gt_2015)
+second_model_typical = lm(CO ~ . - NOX - TIT, data = gt_2015_typical)
+second_model_high    = lm(CO ~ . - NOX - TEY, data = gt_2015_high)
+
+invisible(vif(second_model_all    ))
+invisible(vif(second_model_typical))
+invisible(vif(second_model_high   ))
+
+third_model_all     = lm(CO ~ . - NOX - TIT - CDP, data = gt_2015)
+third_model_typical = lm(CO ~ . - NOX - TIT - AT, data = gt_2015_typical)
+third_model_high    = lm(CO ~ . - NOX - TEY - CDP, data = gt_2015_high)
+
+invisible(vif(third_model_all    ))
+invisible(vif(third_model_typical))
+invisible(vif(third_model_high   ))
+
+initial_typical_linear_model <- third_model_typical
+initial_high_linear_model    <- third_model_high
+
+fourth_model_all     = lm(CO ~ . - NOX - TIT - CDP - TEY, data = gt_2015)
+
+invisible(vif(fourth_model_all))
+
+initial_all_linear_model <- fourth_model_all
+```
+
 VIF for overall production range 
 
-**----- ADD VIF 1 HERE -----**
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+vif(initial_all_linear_model)
+```
 
 VIF for typical production range 
 
-**----- ADD VIF 2 HERE -----**
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+vif(initial_typical_linear_model)
+```
 
 VIF for high production range
 
-**----- ADD VIF 3 HERE -----**
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+vif(initial_high_linear_model)
+```
 
 
+## Multiple Linear Regression
+
+We will create a multiple linear regression model using the feature variables remaining after preparing our data -- AT, AP, AH, AFDP, GTEP, and TAT. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $\beta$ using:
+
+$$\hat{\beta} = (X^TX)^{-1}X$$
+[[**Source**]](https://daviddalpiaz.github.io/appliedstats/simple-linear-regression.html)
+
+Key assumptions are stated as: 
+
+* **L**inearity: can be written as a linear combination of the predictors.
+* **I**ndependence: the errors are independent of each other (not highly correlated).
+* **N**ormality: the distribution of the errors follow a normal distribution.
+* **E**qual Variance: the error variance is the same. 
+
+We will then use model selection using VIF to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model.
+
+
+
+## Lasso 
+
+The Lasso model is similar in structure to the linear model, but it differs in how the variable selection process is treated. Lasso models often perform better than a simple/multiple linear regression because the Lasso model can penalize unimportant variables by shrinking their corresponding coefficients, which decreases the influence those variables have on the model. This is preferable over the linear regression model because the variance can be decreased without largely impacting the model’s bias.
+
+$$\sum_{i=1}^{n} \Big(y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{ij}\Big)^2 + \lambda \sum_{j=1}^{p} |\beta_j|$$
+
+[[**Source**]](https://statisticallearning.org/regularization.html)
+
+
+## Decision Tree 
+
+Decision trees are nonparametric models and work by taking in all of the characteristics of the observations, and then splitting the data into separate groups based on the optimal splitting characteristics. These models are called decision tree models because each split can be thought of as a branch in a tree. The leaves are thus called terminal nodes in this model because that is where the model outputs the prediction based on all the splitting criteria up until that point. A decision tree can be used to predict both categorical outcomes and quantitative outcomes. In this analysis, we are looking for a numeric outcome so a regression tree is used. 
+
+
+$$\textrm{Gini}(K) = \sum_{i \in N} P_{i,K}(1-P_{i,K}) = 1 - \sum_{i \in N} P^2_{i,K}$$
+
+
+[[**Source**]]()
+
+## Correlations
+
+Correlation is a statistical measure that measures which two variables are linearly related. It is commonly used to describe simple relationships without discussing the cause and effect.
+
+$$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
+
+[[**Source**]](https://www.geeksforgeeks.org/python-pearson-correlation-test-between-two-variables/)
 
