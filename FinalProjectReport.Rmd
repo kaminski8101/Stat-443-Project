@@ -278,7 +278,7 @@ RMSE_Table
 \caption{Overall Production Range Decision Tree}
 \end{figure}
 
-The decision tree above represents our final tree model that was trained on the entire data set supplied to us. The first split the tree made was on the turbine inlet temperatures, separating observations where the TIT was less than 1048.75 to the left and the remaining observations to the right. If we observe all of the terminal nodes on each side of the tree after this first split, it is clear that the higher TIT values resulted in lower CO values with the exception of 1 observation where the CO output was very high at 25.26. This value is an anomaly and we do believe it to be a result of incorrect data entry (maybe it should have been 2.526), or some equipment malfunction (see section 5). Similar to the TIT values, it is also observed that higher TAT, AT, and AFDP values also resulted in lower CO output as well. 
+The decision tree above represents the final tree model that was trained on the entire data set supplied to us. The first split the tree made was on the turbine inlet temperatures, separating observations where the TIT was less than 1048.75 to the left and the remaining observations to the right. If we observe all of the terminal nodes on each side of the tree after this first split, it is clear that the higher TIT values resulted in lower CO values with the exception of 1 observation where the CO output was very high at 25.26. This value is an anomaly, and we do believe it to be a result of incorrect data entry (maybe it should have been 2.526), or some equipment malfunction. Similar to the TIT values, it is also observed that **higher TAT, AT, and AFDP** values also resulted in lower CO output as well. 
 
 
 ## Typical Decision Tree Model 
@@ -289,7 +289,7 @@ The decision tree above represents our final tree model that was trained on the 
 \caption{Typical Production Range Decision Tree}
 \end{figure}
 
-This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 134.5. This tree first split on AT, and actually terminates when the AT is less than 14.122 with an output, arguing that AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our tree in the previous slide. Again, the single anomaly is a CO output with a very high value at 36.45, again believed to be an error in the data. We also observe that the lower GTEP values look to result in lower CO output, same being with AP, however because of that anomaly AP is not a strong argument. 
+This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 134.5. This tree first split on AT, and actually terminates when the AT is less than 14.122 with an output. We can infer AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our overall tree model. The single anomaly is a CO output with a very high value at 36.45, again believed to be an error in the data. **Lower GTEP** values look to result in lowering CO output, same being with AP. However, with that anomaly, AP is not a strong argument. 
 
 
 ## High Decision Tree Model
@@ -300,7 +300,7 @@ This decision tree represents our final tree model that was trained on the typic
 \caption{High Production Range Decision Tree}
 \end{figure}
 
-And finally, this decision tree represents our final tree model that was built on the high production range data with TEY values over 160. This tree argues that higher AFDP values on average result in lower CO output because the average value of the nodes on the right side is lower than those on the left. Unlike our previous models, AT does not show a very strong relationship with the CO output values. Higher TEY and AH values look to have lower CO outputs. 
+This decision tree represents our final tree model that was built on the high production range data with TEY values over 160. This tree argues that higher AFDP values on average result in lower CO output because the average value of the nodes on the right side is lower than those on the left. Unlike our previous models, AT does not show a very strong relationship with the CO output values. **Higher TEY and AH** values look to have lower CO outputs. 
 
 ## Tree Model Explanations 
 
@@ -312,18 +312,18 @@ The table above shows us the single correlations between CO and the explanatory 
 
 ### Ambient Temperature Plots
 
-```{r}
+```{r,  message=FALSE, echo=FALSE, warning=FALSE}
 model = lm(gt_2015$AT ~ gt_2015$TEY)
 ggplot(model, aes(x = gt_2015$TEY, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Total Energy Yield") + labs(y = "Ambient Temperature") + labs(title = "Figure 6: Relationship between Total Energy Yield and Ambient Temperature")
 ```
 
-```{r}
+```{r,  message=FALSE, echo=FALSE, warning=FALSE}
 model2 = lm(gt_2015$AT ~ gt_2015$CO)
 ggplot(model, aes(x = gt_2015$CO, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Carbon Monoxide") + labs(y = "Ambient Temperature") + labs(title = "Figure 7: Relationship between Carbon Monoxide and Ambient Temperature")
 ```
 
 
-The plots above help further explain the why higher AT result in lower CO outputs. The plot on top shows no clear trend with TEY values less than around 145, but a clear negative trend when the TEY values are above 145. This argues that the extreme TEY values are impacted by AT, likely because at very high temperatures the machines can not work as hard or they will overheat. The plot on the bottom shows AT against CO, where we see 9 CO values greater than 17 whereas the other 7300 observations are less. 
+Figures 6 and 7 above help further explain the why higher AT result in lower CO outputs. Figure 6 shows no clear trend with TEY values less than around 145, but a clear negative trend when the TEY values are above 145. This shows the extreme TEY values are impacted by AT, likely because at very high temperatures the machines can not work as hard or they will overheat. Figure 7 on the bottom shows AT against CO, where we see 9 CO values greater than 17 whereas the other 7300 observations are less. 
 
 \newpage
 
@@ -371,7 +371,6 @@ Key assumptions are stated as:
 * **E**qual Variance: the error variance is the same. 
 
 We will then use model selection using VIF to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model.
-
 
 
 ## Lasso 
