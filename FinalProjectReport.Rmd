@@ -151,41 +151,6 @@ lasso_pred_all <- predict(all_lasso_mod, test_all)
 lasso_pred_typical <- predict(typical_lasso_mod, test_typical)
 lasso_pred_high <- predict(high_lasso_mod, test_high)
 
-# Box-Cox Transformed Models
-all_bc_linear_mod <- train(
-          form = CO^(.2) ~ . - TIT - CDP - TEY ,
-          data = train_all,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          nvmax = 10,
-          trace = FALSE
-)
-typical_bc_linear_mod <- train(
-          form = CO^(.6) ~ . - TIT - AT,
-          data = train_typical,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          nvmax = 10,
-          trace = FALSE
-)
-high_bc_linear_mod <- train(
-          form = CO^(1.9) ~ . - TEY - CDP,
-          data = train_high,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          nvmax = 10,
-          trace = FALSE
-)
-all_bc_linear_mod_lm     <- lm( ( (CO^(.2)-1)/.2  ) ~ AT + AP + AH + AFDP + GTEP + TAT,
-                                data = test_all)
-typical_bc_linear_mod_lm <- lm( ( (CO^(.6)-1)/.6  ) ~ AP + AH + AFDP + GTEP + TAT + TEY + CDP,
-                                data = test_typical)
-high_bc_linear_mod_lm    <- lm( ( (CO^(1.9)-1)/1.9) ~ AT + AFDP + GTEP + TIT + TAT,
-                                data =  test_high)
-bc_pred_all <- predict(all_bc_linear_mod_lm, test_all, method="BoxCox")
-bc_pred_typical <- predict(typical_bc_linear_mod_lm, test_typical, method="BoxCox")
-bc_pred_high <- predict(high_bc_linear_mod_lm, test_high, method="BoxCox")
-
 # Decision Trees
 tree_CO_all <- tree(CO ~ . , train_all, 
                   control = tree.control(nobs = length(train_all$CO), 
@@ -285,12 +250,6 @@ high_lass_rmse    <- RMSE(test_high$CO, lasso_pred_high)
 all_tree_rmse     <- RMSE(test_all$CO, tree_pred_all)
 typical_tree_rmse <- RMSE(test_typical$CO, tree_pred_typical)
 high_tree_rmse    <- RMSE(test_high$CO, tree_pred_high)
-
-all_bc_rmse     <- RMSE(test_all$CO, bc_pred_all)
-typical_bc_rmse <- RMSE(test_typical$CO, bc_pred_typical)
-high_bc_rmse    <- RMSE(test_high$CO, bc_pred_high)
-
-  
 
 RMSE_Table <- matrix(c(round(all_linear_rmse    ,digits = 4),
                        round(typical_linear_rmse,digits = 4),
