@@ -343,6 +343,32 @@ The table above shows us the single correlations between CO and the explanatory 
 
 The plots above help further explain the why higher AT result in lower CO outputs. The plot on top shows no clear trend with TEY values less than around 145, but a clear negative trend when the TEY values are above 145. This argues that the extreme TEY values are impacted by AT, likely because at very high temperatures the machines can’t work as hard or they will overheat. The plot on the bottom shows AT against CO, where we see 9 CO values greater than 17 whereas the other 7300 observations are less. 
 
+\newpage
+
+# Conclusion 
+
+## Most Sensitive Process Variables 
+
+Based on our results, the following variables are the most sensitive process variables for the overall production range:
+
+* NA
+* NA
+
+Based on our results, the following variables are the most sensitive process variables for the typical production range:
+
+* NA
+* NA
+
+Based on our results, the following variables are the most sensitive process variables for the high production range:
+
+* NA
+* NA
+
+As you can see...
+
+## Suggestions 
+
+
 
 \newpage
 
