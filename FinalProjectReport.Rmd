@@ -278,7 +278,7 @@ RMSE_Table
 \caption{Overall Production Range Decision Tree}
 \end{figure}
 
-The decision tree above represents the final tree model that was trained on the entire data set supplied to us. The first split the tree made was on the turbine inlet temperatures, separating observations where the TIT was less than 1048.75 to the left and the remaining observations to the right. If we observe all of the terminal nodes on each side of the tree after this first split, it is clear that the higher TIT values resulted in lower CO values with the exception of 1 observation where the CO output was very high at 25.26. This value is an anomaly, and we do believe it to be a result of incorrect data entry (maybe it should have been 2.526), or some equipment malfunction. Similar to the TIT values, it is also observed that **higher TAT, AT, and AFDP** values also resulted in lower CO output as well. 
+The decision tree above represents the final tree model that was trained on the entire data set supplied to us. The first split the tree made was on the turbine inlet temperatures, separating observations where the TIT was less than 1049.75 to the left and the remaining observations to the right. If we observe all of the terminal nodes on each side of the tree after this first split, it is clear that the higher TIT values resulted in lower CO values. Similar to the TIT values, it is also observed that **higher TAT, AT, and AFDP** values also resulted in lower CO output as well. 
 
 
 ## Typical Decision Tree Model 
@@ -289,7 +289,7 @@ The decision tree above represents the final tree model that was trained on the 
 \caption{Typical Production Range Decision Tree}
 \end{figure}
 
-This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 134.5. This tree first split on AT, and actually terminates when the AT is less than 14.122 with an output. We can infer AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our overall tree model. The single anomaly is a CO output with a very high value at 36.45, again believed to be an error in the data. **Lower GTEP** values look to result in lowering CO output, same being with AP. However, with that anomaly, AP is not a strong argument. 
+This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 134.5. This tree first split on AT, and actually terminates when the AT is greater than 11.9655. We can infer AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our overall tree model. We can conclude **Lower GTEP and higher AT** values look to result in lowering CO output.
 
 
 ## High Decision Tree Model
@@ -300,7 +300,7 @@ This decision tree represents our final tree model that was trained on the typic
 \caption{High Production Range Decision Tree}
 \end{figure}
 
-This decision tree represents our final tree model that was built on the high production range data with TEY values over 160. This tree argues that higher AFDP values on average result in lower CO output because the average value of the nodes on the right side is lower than those on the left. Unlike our previous models, AT does not show a very strong relationship with the CO output values. **Higher TEY and AH** values look to have lower CO outputs. 
+This decision tree represents our final tree model that was built on the high production range data with TEY values over 160. This tree argues that higher AFDP values on average result in lower CO output because the average value of the nodes on the right side is lower than those on the left. Unlike our previous models, AT does not show a very strong relationship with the CO output values. **Higher TEY and lower TAT** values look to have lower CO outputs. 
 
 ## Tree Model Explanations 
 
