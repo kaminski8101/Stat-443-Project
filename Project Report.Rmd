@@ -319,7 +319,6 @@ plot(typical_bc_linear_mod$finalModel)
 #Results
 ```{r }
 all_linear_mod$results
-<<<<<<< HEAD
 all_bc_linear_mod$results
 all_lasso_mod$results
 
@@ -329,21 +328,18 @@ typical_lasso_mod$results
 
 high_linear_mod$results
 high_bc_linear_mod$results
-=======
 all_lasso_mod$results
 
 typical_linear_mod$results
 typical_lasso_mod$results
 
 high_linear_mod$results
->>>>>>> 39fe1b34f520f17a1d659483a9412585a4af773a
 high_lasso_mod$results
 ```
 
 #plots
 ```{r }
 plot(all_linear_mod$finalModel)
-<<<<<<< HEAD
 plot(all_bc_linear_mod$finalModel)
 #plot(all_lasso_mod$finalModel)
 
@@ -353,20 +349,18 @@ plot(typical_bc_linear_mod$finalModel)
 
 plot(high_linear_mod$finalModel)
 plot(high_bc_linear_mod$finalModel)
-=======
 #plot(all_lasso_mod$finalModel)
 
 plot(typical_linear_mod$finalModel)
 #plot(typical_lasso_mod$finalModel)
 
 plot(high_linear_mod$finalModel)
->>>>>>> 39fe1b34f520f17a1d659483a9412585a4af773a
 #plot(high_lasso_mod$finalModel)
 ```
 
 #Outlier Search
 ```{r}
-<<<<<<< HEAD
+
 plot(cooks.distance(all_linear_mod$finalModel))
 plot(cooks.distance(all_bc_linear_mod$finalModel))
 
@@ -503,9 +497,6 @@ plot(or_high_linear_mod$finalModel)
 
 ##Linear Model Diagnostic Plots
 ```{r}
-
-```
-=======
 # plot(cooks.distance(all_linear_mod$finalModel))
 # plot(cooks.distance(typical_linear_mod$finalModel))
 # plot(cooks.distance(high_linear_mod$finalModel))
@@ -535,8 +526,6 @@ which(cooks.distance(all_bc_linear_mod$finalModel) > 4/nrow(gt_2015))
 which(cooks.distance(typical_bc_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
 which(cooks.distance(high_bc_linear_mod$finalModel) > 4/nrow(gt_2015_high))
 ```
-
->>>>>>> 39fe1b34f520f17a1d659483a9412585a4af773a
 
 
 ## Decision Trees
