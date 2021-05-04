@@ -238,7 +238,7 @@ For all of our models, we split our data into training and testing datasets to a
 
 In the table below, the decision tree outperforms linear regression and lasso in the overall production range, typical production range, and high production range. Therefore, we decided to use the Decision Tree Model to examine the biggest impact on emission levels in order to decrease emissions overall. 
 
-```{r, message=FALSE, echo=FALSE, warning=FALSE}
+```{r,include = FALSE,  message=FALSE, echo=FALSE, warning=FALSE}
 all_linear_rmse     <- RMSE(test_all$CO, linear_pred_all)
 typical_linear_rmse <- RMSE(test_typical$CO, linear_pred_typical)
 high_linear_rmse    <- RMSE(test_high$CO, linear_pred_high)
@@ -253,21 +253,6 @@ high_tree_rmse    <- RMSE(test_high$CO, tree_pred_high)
 ```
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
-RMSE_Table <- matrix(c(round(all_linear_mod$results$RMSE        ,digits = 4),
-                       round(typical_linear_mod$results$RMSE    ,digits = 4),
-                       round(high_linear_mod$results$RMSE       ,digits = 4),
-                       round(max(all_lasso_mod$results$RMSE)    ,digits = 4),
-                       round(max(typical_lasso_mod$results$RMSE),digits = 4),
-                       round(max(high_lasso_mod$results$RMSE)   ,digits = 4),
-                       round(all_tree_rmse                      ,digits = 4),
-                       round(typical_tree_rmse                  ,digits = 4),
-                       round(high_tree_rmse                     ,digits = 4 )), 
-                       ncol=3, byrow=TRUE)
-colnames(RMSE_Table) <- c("Overall Production Range", "Typical Production Range (127-134.5)", "High Production Range (160+)")
-rownames(RMSE_Table) <- c("Linear Regression", "Lasso", "Decision Tree" )
-RMSE_Table <- kable(as.table(RMSE_Table))
-
-
 RMSE_Table <- matrix(c(round(all_linear_rmse    ,digits = 4),
                        round(typical_linear_rmse,digits = 4),
                        round(high_linear_rmse   ,digits = 4),
