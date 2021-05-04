@@ -12,6 +12,22 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r include = FALSE}
+# Load required packages
+library(readr) 
+library(caret)
+library(tidyverse)
+library(tree)
+library(knitr)
+library(faraway)
+
+# Create RMSE function
+RMSE <- function(y, y_hat) {
+  rmse <- sqrt(sum(((y_hat - y)^2)/length(y)))
+  print(rmse)
+}
+```
+
 \newpage
 
 \tableofcontents
@@ -55,16 +71,124 @@ The data file `gt_2015.csv` has 7384 observations and 11 variables from the [**U
 Here’s a quick peek at the data set:
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
-library(readr) 
 gt_2015 <- read_csv("Project Data/gt_2015.csv")
-gt_2015_typical <- gt_2015[gt_2015$TEY <= 133 & gt_2015$TEY >= 127,]
+
+# Fix or remove problematic observations (this will be explained later)
+gt_2015[c(1363,1364,1585,3977,3978,4762,5752,5753,6901),10] <- gt_2015[c(1363,1364,1585,3977,3978,4762,5752,5753,6901),10] / 10
+gt_2015 <- gt_2015[-c(1796,1713,1712,1711,1710,1709,1301,1009,626,121,120,119,118,117,116,115),]
+gt_2015_typical <- gt_2015[gt_2015$TEY <= 134.5 & gt_2015$TEY >= 127,]
 gt_2015_high <- gt_2015[gt_2015$TEY >= 160,]
+
+# Display table
 knitr::kable(head(gt_2015)[,])
 ```
 
 \newpage
 
 # Methods
+
+```{r include=FALSE}
+set.seed(10)
+# Set 5-fold cross validation
+cv_5 <- trainControl(method = "cv", number = 5)
+
+# AIC stepwise selected linear models 
+all_linear_mod <- train(
+          form = CO ~ . - NOX - TIT - CDP - TEY ,
+          data = gt_2015,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+all_linear_mod_lm <- lm(CO ~ AT + AH + AFDP + GTEP + TAT, data = gt_2015)
+typical_linear_mod <- train(
+          form = CO ~ . - NOX - TIT - AT,
+          data = gt_2015_typical,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+typical_linear_mod_lm <- lm(CO ~ AP + AH + AFDP + GTEP + TAT + TEY + CDP, data = gt_2015_typical)
+high_linear_mod <- train(
+          form = CO ~ . - NOX - TEY - CDP,
+          data = gt_2015_high,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+high_linear_mod_lm <- lm(CO ~ AT + AFDP + GTEP + TIT + TAT, data =  gt_2015_high)
+
+# Lasso models
+all_lasso_mod <- train(
+          form = CO ~ . - NOX - TIT - CDP - TEY ,
+          data = gt_2015,
+          method = "lasso",
+          trControl = cv_5
+)
+typical_lasso_mod <- train(
+          form = CO ~ . - NOX - TIT - AT,
+          data = gt_2015_typical,
+          method = "lasso",
+          trControl = cv_5
+)
+high_lasso_mod <- train(
+          form = CO ~ . - NOX - TEY - CDP,
+          data = gt_2015_high,
+          method = "lasso",
+          trControl = cv_5
+)
+
+# Box-Cox Transformed Models
+all_bc_linear_mod <- train(
+          form = CO^(.2) ~ . - NOX  - TIT - CDP - TEY ,
+          data = gt_2015,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          nvmax = 10,
+          trace = FALSE
+)
+typical_bc_linear_mod <- train(
+          form = CO^(.6) ~ . - NOX - TIT - AT,
+          data = gt_2015_typical,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          nvmax = 10,
+          trace = FALSE
+)
+high_bc_linear_mod <- train(
+          form = CO^(1.9) ~ . - NOX - TEY - CDP,
+          data = gt_2015_high,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          nvmax = 10,
+          trace = FALSE
+)
+
+# Decision Trees
+train_all <- gt_2015 %>% dplyr::select(-NOX) %>% sample_frac(0.8)
+test_all <- gt_2015 %>% dplyr::select(-NOX) %>% setdiff(train_all)
+train_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% sample_frac(0.8)
+test_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% setdiff(train_typical)
+train_high <- gt_2015_high %>% dplyr::select(-NOX) %>% sample_frac(0.8)
+test_high <- gt_2015_high %>% dplyr::select(-NOX) %>% setdiff(train_high)
+tree_CO_all <- tree(CO ~ . , train_all, 
+                  control = tree.control(nobs = length(train_all$CO), 
+                                         minsize = 4, mindev=0.001), method = "recursive.partition")
+tree_CO_typical <- tree(CO ~ . , train_typical,
+                        control = tree.control(nobs = length(train_typical$CO), 
+                                         minsize = 4, mindev=0.001), method = "recursive.partition")
+tree_CO_high <- tree(CO ~ . , train_high,
+                     control = tree.control(nobs = length(train_high$CO), 
+                                         minsize = 4, mindev=0.001), method = "recursive.partition")
+pruned_tree_all <- prune.tree(tree_CO_all, best = 8)
+pruned_tree_typical <- prune.tree(tree_CO_typical, best = 7)
+pruned_tree_high <- prune.tree(tree_CO_high, best = 6)
+tree_pred_all <- predict(pruned_tree_all, test_all)
+tree_pred_typical <- predict(pruned_tree_typical, test_typical)
+tree_pred_high <- predict(pruned_tree_high, test_high)
+```
+
+
 
 ## Exploratory Data Analysis 
 
@@ -95,10 +219,10 @@ The client provided us a set of production ranges to analyze. An overall product
 d = density(gt_2015$TEY)
 plot(d, xlab = "Turbine Energy Yield", ylab = "Density", main = "Figure 2: Turbine Energy Yield Distribution")
 polygon(d, col = "blue4", border = "chocolate1")
-abline(v = c(127,133,160), lty = c(1,1,2), col = c("red","red","black"))
+abline(v = c(127,134.5,160), lty = c(1,1,2), col = c("red","red","black"))
 ```
 
-The typical production range the client provided did not fully capture the typical production range that we observed in our data sample (see Figure 2 above). This could be a result of the data values from the 2015 data set having lower values compared to other data sets. Therefore, we decided to shift the typical production range to 127 to 133 given that it is a better representation of the typical production range of the carbon monoxide emission output. 
+The typical production range the client provided did not fully capture the typical production range that we observed in our data sample (see Figure 2 above). This could be a result of the data values from the 2015 data set having lower values compared to other data sets. Therefore, we decided to shift the typical production range to 127 to 134.5 given that it is a better representation of the typical production range of the carbon monoxide emission output. 
 
 
 ### Data Preparation 
@@ -118,7 +242,7 @@ We decided to examine three different models to make sure that the model we sele
 
 ### RMSE
 
-In order to determine which model was the most effective, we compared the RMSE of multiple linear regression, lasso, and decision tree models. Root Mean Squared Errors are the standard deviation of residuals. Residuals are a measure of how far from the regression line data points are. The point of calculating the RMSE is to measure how spread out these variables are. The rule of thumb is, the lower the RMSE, the better. 
+In order to determine which model was the most effective, we compared the RMSE of multiple linear regression, lasso, and decision tree models. Root Mean Squared Errors are the standard deviation of residuals. Residuals are a measure of the distance between the predicted and actual values. The point of calculating the RMSE is to measure how spread out these variables are. The rule of thumb is, the lower the RMSE, the better. 
 
 ### Training and Testing Data
 
@@ -134,10 +258,42 @@ For all of our models, we split our data into training and testing datasets to a
 In the table below, the decision tree outperforms linear regression and lasso in the overall production range, typical production range, and high production range. Therefore, we decided to use the Decision Tree Model to examine the biggest impact on emission levels in order to decrease emissions overall. 
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
-tab <- matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA), ncol=3, byrow=TRUE)
-colnames(tab) <- c('Overall Production Range','Typical Production Range (127-133)','High Production Range (160+)')
-rownames(tab) <- c('Linear Regression','Lasso','Decision Tree')
-knitr::kable(as.table(tab), digits = 2, caption = "RMSE Values Between Different Models and Ranges")
+all_linear_rmse     <- all_linear_mod$results$RMSE
+typical_linear_rmse <- typical_linear_mod$results$RMSE
+high_linear_rmse    <- high_linear_mod$results$RMSE
+
+all_lass_rmse     <- max(all_lasso_mod$results$RMSE)
+typical_lass_rmse <- max(typical_lasso_mod$results$RMSE)
+high_lass_rmse    <- max(high_lasso_mod$results$RMSE)
+
+all_tree_rmse     <- RMSE(test_all$CO, tree_pred_all)
+typical_tree_rmse <- RMSE(test_typical$CO, tree_pred_typical)
+high_tree_rmse    <- RMSE(test_high$CO, tree_pred_high)
+
+bc_all_rmse     <- all_bc_linear_mod$results$RMSE
+bc_typical_rmse <- typical_bc_linear_mod$results$RMSE
+bc_high_rmse    <- high_bc_linear_mod$results$RMSE
+
+  
+
+RMSE_Table <- matrix(c(round(all_linear_mod$results$RMSE        ,digits = 4),
+                       round(typical_linear_mod$results$RMSE    ,digits = 4),
+                       round(high_linear_mod$results$RMSE       ,digits = 4),
+                       round(all_bc_linear_mod$results$RMSE     ,digits = 4),
+                       round(typical_bc_linear_mod$results$RMSE ,digits = 4),
+                       round(high_bc_linear_mod$results$RMSE    ,digits = 4),
+                       round(max(all_lasso_mod$results$RMSE)    ,digits = 4),
+                       round(max(typical_lasso_mod$results$RMSE),digits = 4),
+                       round(max(high_lasso_mod$results$RMSE)   ,digits = 4),
+                       round(all_tree_rmse                      ,digits = 4),
+                       round(typical_tree_rmse                  ,digits = 4),
+                       round(high_tree_rmse                     ,digits = 4 )) 
+                     ,ncol=3, byrow=TRUE)
+colnames(RMSE_Table) <- c("Overall Production Range", "Typical Production Range (127-134.5)", "High Production Range (160+)")
+rownames(RMSE_Table) <- c("Linear Regression", "Box-Cox Transformed", "Lasso", "Decision Tree" )
+RMSE_Table <- as.table(RMSE_Table)
+RMSE_Table <- kable(RMSE_Table)
+RMSE_Table
 ```
 
 ## Overall Decision Tree Model
@@ -159,7 +315,7 @@ The decision tree above represents our final tree model that was trained on the 
 \caption{Typical Production Range Decision Tree}
 \end{figure}
 
-This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 133. This tree first split on AT, and actually terminates when the AT is less than 14.122 with an output, arguing that AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our tree in the previous slide. Again, the single anomaly is a CO output with a very high value at 36.45, again believed to be an error in the data. We also observe that the lower GTEP values look to result in lower CO output, same being with AP, however because of that anomaly AP is not a strong argument. 
+This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 134.5. This tree first split on AT, and actually terminates when the AT is less than 14.122 with an output, arguing that AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our tree in the previous slide. Again, the single anomaly is a CO output with a very high value at 36.45, again believed to be an error in the data. We also observe that the lower GTEP values look to result in lower CO output, same being with AP, however because of that anomaly AP is not a strong argument. 
 
 
 ## High Decision Tree Model
@@ -198,7 +354,6 @@ The plots above help further explain the why higher AT result in lower CO output
 Variance Inflation Factor detects multicollinearity in regression analysis. Multicollinearity is when the correlation between predictors affects regression results. We only used VIF in our linear based models.
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
-library(faraway)
 full_model_all     = lm(CO ~ . - NOX, data = gt_2015)
 full_model_typical = lm(CO ~ . - NOX, data = gt_2015_typical)
 full_model_high    = lm(CO ~ . - NOX, data = gt_2015_high)

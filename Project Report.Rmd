@@ -38,7 +38,7 @@ Here’s a quick peek at the data set:
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 library(readr) 
 gt_2015 <- read_csv("Project Data/gt_2015.csv")
-gt_2015_typical <- gt_2015[gt_2015$TEY <= 133 & gt_2015$TEY >= 127,]
+gt_2015_typical <- gt_2015[gt_2015$TEY <= 134.5 & gt_2015$TEY >= 127,]
 gt_2015_high <- gt_2015[gt_2015$TEY >= 160,]
 knitr::kable(head(gt_2015)[,])
 knitr::kable(head(gt_2015_typical)[,])
@@ -132,8 +132,41 @@ Exploratory analysis shows possible linear relationships between the response va
 d <- density(gt_2015$TEY)
 plot(d, xlab = "Turbine Energy Yield", ylab = "Density", main = "Turbnine Energy Yield Distribution")
 polygon(d, col = "blue4", border = "chocolate1")
-abline(v = c(127,133,160), lty = c(1,1,2), col = c("red","red","black"))
+abline(v = c(127,134.5,160), lty = c(1,1,2), col = c("red","red","black"))
 ```
+
+
+
+
+
+
+
+
+
+
+# Find and fix/remove ouliers
+```{r}
+# plot(gt_2015$CO)
+# abline(h = 15)
+
+# which(gt_2015$CO > 15)
+# 
+# gt_2015[c(seq(119-6,119+4)),]
+
+gt_2015[c(1363,1364,1585,3977,3978,4762,5752,5753,6901),10] <- gt_2015[c(1363,1364,1585,3977,3978,4762,5752,5753,6901),10] / 10
+
+# gt_2015[c(1363,1364,1585,3977,3978,4762,5752,5753,6901),]
+
+
+gt_2015 <- gt_2015[-c(1796,1713,1712,1711,1710,1709,1301,1009,626,121,120,119,118,117,116,115),]
+# which(gt_2015$CO > 15)
+
+# plot(gt_2015$CO)
+
+gt_2015_typical <- gt_2015[gt_2015$TEY <= 134.5 & gt_2015$TEY >= 127,]
+gt_2015_high <- gt_2015[gt_2015$TEY >= 160,]
+```
+
 
 # Methods
 
@@ -220,7 +253,7 @@ all_lasso_mod <- train(
 )
 ```
 
-#Typical Energy Yield (130-136)
+#Typical Energy Yield (127-134.5)
 ```{r include=FALSE}
 set.seed(10)
 #AIC stepwise selected linear model 
@@ -280,26 +313,26 @@ high_lambda <- boxcox(high_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(hig
 #All Data Box-Cox Transformed Linear Model
 set.seed(10)
 all_bc_linear_mod <- train(
-          form = CO^(.1) ~ . - NOX  - TIT - CDP - TEY ,
+          form = CO^(.2) ~ . - NOX  - TIT - CDP - TEY ,
           data = gt_2015,
           method = "lmStepAIC",
           trControl = cv_5,
           nvmax = 10,
           trace = FALSE
 )
-all_bc_linear_mod_lm <- lm(CO^(.1) ~ AT + AP + AH + AFDP + GTEP + TAT, data = gt_2015)
+all_bc_linear_mod_lm <- lm(CO^(.2) ~ AT + AP + AH + AFDP + GTEP + TAT, data = gt_2015)
 plot(all_bc_linear_mod$finalModel)
 
 #Typical Data Box-Cox Transformed Linear Model
 typical_bc_linear_mod <- train(
-          form = CO^(-.1) ~ . - NOX - TIT - AT,
+          form = CO^(.6) ~ . - NOX - TIT - AT,
           data = gt_2015_typical,
           method = "lmStepAIC",
           trControl = cv_5,
           nvmax = 10,
           trace = FALSE
 )
-typical_bc_linear_mod_lm <- lm(CO^(-.1) ~ AP + AH + AFDP + GTEP + TAT + TEY + CDP, data = gt_2015_typical)
+typical_bc_linear_mod_lm <- lm(CO^(.6) ~ AP + AH + AFDP + GTEP + TAT + TEY + CDP, data = gt_2015_typical)
 plot(typical_bc_linear_mod$finalModel)
 
 #High Data Box-Cox Transformed Linear Model
@@ -328,12 +361,6 @@ typical_lasso_mod$results
 
 high_linear_mod$results
 high_bc_linear_mod$results
-all_lasso_mod$results
-
-typical_linear_mod$results
-typical_lasso_mod$results
-
-high_linear_mod$results
 high_lasso_mod$results
 ```
 
@@ -341,238 +368,36 @@ high_lasso_mod$results
 ```{r }
 plot(all_linear_mod$finalModel)
 plot(all_bc_linear_mod$finalModel)
-#plot(all_lasso_mod$finalModel)
+plot(all_lasso_mod$finalModel)
 
 plot(typical_linear_mod$finalModel)
 plot(typical_bc_linear_mod$finalModel)
-#plot(typical_lasso_mod$finalModel)
+plot(typical_lasso_mod$finalModel)
 
 plot(high_linear_mod$finalModel)
 plot(high_bc_linear_mod$finalModel)
-#plot(all_lasso_mod$finalModel)
-
-plot(typical_linear_mod$finalModel)
-#plot(typical_lasso_mod$finalModel)
-
-plot(high_linear_mod$finalModel)
-#plot(high_lasso_mod$finalModel)
+plot(high_lasso_mod$finalModel)
 ```
 
 #Outlier Search
-```{r}
-
-plot(cooks.distance(all_linear_mod$finalModel))
-plot(cooks.distance(all_bc_linear_mod$finalModel))
-
-
-plot(cooks.distance(typical_linear_mod$finalModel))
-plot(cooks.distance(typical_bc_linear_mod$finalModel))
-
-
-plot(cooks.distance(high_linear_mod$finalModel))
-plot(cooks.distance(high_bc_linear_mod$finalModel))
-
-
-
-which(cooks.distance(all_linear_mod$finalModel) > .05)
-which(cooks.distance(all_bc_linear_mod$finalModel) > .04)
-
-
-which(cooks.distance(typical_linear_mod$finalModel) > .05)
-which(cooks.distance(typical_bc_linear_mod$finalModel) > .04)
-
-
-which(cooks.distance(high_linear_mod$finalModel) > .05)
-which(cooks.distance(high_bc_linear_mod$finalModel) >.04)
-
-
-
-
-which(cooks.distance(all_linear_mod$finalModel) > 4/nrow(gt_2015))
-which(cooks.distance(all_bc_linear_mod$finalModel) > 4/nrow(gt_2015))
-
-
-which(cooks.distance(typical_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
-which(cooks.distance(typical_bc_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
-
-
-which(cooks.distance(high_linear_mod$finalModel) > 4/nrow(gt_2015_high))
-which(cooks.distance(high_bc_linear_mod$finalModel) > 4/nrow(gt_2015_high))
-```
-
-#Outlier Removal
-```{r}
-outlier_removed_gt_2015 <- gt_2015[which(cooks.distance(all_linear_mod$finalModel) < .05),]
-outlier_removed_gt_2015_typical <- gt_2015[which(cooks.distance(typical_linear_mod$finalModel) < .05),]
-outlier_removed_gt_2015_high <- gt_2015[which(cooks.distance(high_linear_mod$finalModel) < .05),]
-```
-
-#Refitting Models
-```{r}
-or_full_model_all     = lm(CO ~ . - NOX, data = outlier_removed_gt_2015)
-or_full_model_typical = lm(CO ~ . - NOX, data = outlier_removed_gt_2015_typical)
-or_full_model_high    = lm(CO ~ . - NOX, data = outlier_removed_gt_2015_high)
-
-(vif(or_full_model_all    ))
-(vif(or_full_model_typical))
-(vif(or_full_model_high   ))
-
-or_second_model_all     = lm(CO ~ . - NOX - TIT, data = outlier_removed_gt_2015)
-or_second_model_typical = lm(CO ~ . - NOX - TIT, data = outlier_removed_gt_2015_typical)
-or_second_model_high    = lm(CO ~ . - NOX - CDP, data = outlier_removed_gt_2015_high)
-
-(vif(or_second_model_all    ))
-(vif(or_second_model_typical))
-(vif(or_second_model_high   ))
-
-or_third_model_all     = lm(CO ~ . - NOX - TIT - CDP, data = outlier_removed_gt_2015)
-or_third_model_typical = lm(CO ~ . - NOX - TIT - CDP, data = outlier_removed_gt_2015_typical)
-or_third_model_high    = lm(CO ~ . - NOX - CDP - TEY, data = outlier_removed_gt_2015_high)
-
-(vif(or_third_model_all    ))
-(vif(or_third_model_typical))
-(vif(or_third_model_high   ))
-
-or_fourth_model_all     = lm(CO ~ . - NOX - TIT - CDP - TEY, data = outlier_removed_gt_2015)
-or_fourth_model_typical = lm(CO ~ . - NOX - TIT - CDP - AFDP, data = outlier_removed_gt_2015_typical)
-or_fourth_model_high    = lm(CO ~ . - NOX - CDP - TEY - AFDP, data = outlier_removed_gt_2015_high)
-
-(vif(or_fourth_model_all    ))
-(vif(or_fourth_model_typical))
-(vif(or_fourth_model_high   ))
-
-or_initial_model_all <- lm(CO ~ . - NOX - TIT - CDP - TEY, data = outlier_removed_gt_2015)
-
-or_fifth_model_typical = lm(CO ~ . - NOX - TIT - CDP - AFDP - GTEP, data = outlier_removed_gt_2015_typical)
-or_fifth_model_high    = lm(CO ~ . - NOX - CDP - TEY - AFDP - GTEP, data = outlier_removed_gt_2015_high)
-
-(vif(or_fifth_model_typical))
-(vif(or_fifth_model_high   ))
-
-or_initial_model_typical = lm(CO ~ . - NOX - TIT - CDP - AFDP - GTEP, data = outlier_removed_gt_2015_typical)
-or_initial_model_high    = lm(CO ~ . - NOX - CDP - TEY - AFDP - GTEP, data = outlier_removed_gt_2015_high)
-```
-
-```{r}
-set.seed(10)
-#AIC stepwise selected linear model 
-or_all_linear_mod <- train(
-          form = CO ~ . - NOX - TIT - CDP - TEY ,
-          data = outlier_removed_gt_2015,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          trace = FALSE
-)
-or_all_linear_mod_lm <- lm(CO ~ AT + AP + AH + AFDP + GTEP + TAT, data = gt_2015)
-
-
-#AIC stepwise selected linear model 
-or_typical_linear_mod <- train(
-          form = CO ~ . - NOX - TIT - CDP - AFDP - GTEP,
-          data = outlier_removed_gt_2015_typical,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          trace = FALSE
-)
-or_typical_linear_mod_lm <- lm(CO ~ AT + AP + AH + TAT + TEY, data = gt_2015)
-
-
-#AIC stepwise selected linear model 
-or_high_linear_mod <- train(
-          form = CO ~ . - NOX - CDP - TEY - AFDP - GTEP,
-          data = outlier_removed_gt_2015_high,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          trace = FALSE
-)
-or_high_linear_mod_lm <- lm(CO ~ AT + AP + AH + TIT + TAT, data = gt_2015)
-```
-
-```{r}
-plot(or_all_linear_mod$finalModel)
-plot(or_typical_linear_mod$finalModel)
-plot(or_high_linear_mod$finalModel)
-```
-
-#Outlier Removed Box-Cox Lambdas
-```{r}
-or_all_lambda <- boxcox(or_all_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(or_all_linear_mod_lm, plotit = FALSE)$y)]
-or_typical_lambda <- boxcox(or_typical_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(or_typical_linear_mod_lm, plotit = FALSE)$y)]
-or_high_lambda <- boxcox(or_high_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(or_high_linear_mod_lm, plotit = FALSE)$y)]
-```
-
-#Outlier Removed Box-Cox Transformed Models
-```{r}
-#All Data Box-Cox Transformed Linear Model
-set.seed(10)
-or_all_bc_linear_mod <- train(
-          form = CO^(.1) ~ . - NOX - TIT - CDP - TEY ,
-          data = outlier_removed_gt_2015,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          trace = FALSE
-)
-or_all_bc_linear_mod_lm <- lm(CO ~ AT + AP + AH + AFDP + GTEP + TAT, data = outlier_removed_gt_2015)
-
-
-#AIC stepwise selected linear model 
-or_typical_bc_linear_mod <- train(
-          form = CO^(.2) ~ . - NOX - TIT - CDP - AFDP - GTEP,
-          data = outlier_removed_gt_2015_typical,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          trace = FALSE
-)
-or_bc_typical_linear_mod_lm <- lm(CO ~AT + AP + TAT + TEY, data = outlier_removed_gt_2015_typical)
-
-
-#AIC stepwise selected linear model 
-or_high_bc_linear_mod <- train(
-          form = CO^(.2) ~ . - NOX - CDP - TEY - AFDP - GTEP,
-          data = outlier_removed_gt_2015_high,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          trace = FALSE
-)
-or_high_bc_linear_mod_lm <- lm(CO ~ AT + AP + TIT + TAT, data = outlier_removed_gt_2015_high)
-```
-
-```{r}
-plot(or_all_bc_linear_mod$finalModel)
-plot(or_typical_bc_linear_mod$finalModel)
-plot(or_high_bc_linear_mod$finalModel)
-```
-
-##Linear Model Diagnostic Plots
 ```{r}
 # plot(cooks.distance(all_linear_mod$finalModel))
 # plot(cooks.distance(typical_linear_mod$finalModel))
 # plot(cooks.distance(high_linear_mod$finalModel))
 # 
+# which(cooks.distance(all_linear_mod$finalModel) > .02)
+# which(cooks.distance(typical_linear_mod$finalModel) > .1)
+# which(cooks.distance(high_linear_mod$finalModel) > .2)
+
+
+
+# plot(cooks.distance(all_bc_linear_mod$finalModel))
+# plot(cooks.distance(typical_bc_linear_mod$finalModel))
+# plot(cooks.distance(high_bc_linear_mod$finalModel))
 # 
-# which(cooks.distance(all_linear_mod$finalModel) > .05)
-# which(cooks.distance(typical_linear_mod$finalModel) > .05)
-# which(cooks.distance(high_linear_mod$finalModel) > .05)
-# 
-# 
-# which(cooks.distance(all_linear_mod$finalModel) > 4/nrow(gt_2015))
-# which(cooks.distance(typical_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
-# which(cooks.distance(high_linear_mod$finalModel) > 4/nrow(gt_2015_high))
-
-
-plot(cooks.distance(all_bc_linear_mod$finalModel))
-plot(cooks.distance(typical_bc_linear_mod$finalModel))
-plot(cooks.distance(high_bc_linear_mod$finalModel))
-
-
-which(cooks.distance(all_bc_linear_mod$finalModel) > .05)
-which(cooks.distance(typical_bc_linear_mod$finalModel) > .05)
-which(cooks.distance(high_bc_linear_mod$finalModel) > .05)
-
-
-which(cooks.distance(all_bc_linear_mod$finalModel) > 4/nrow(gt_2015))
-which(cooks.distance(typical_bc_linear_mod$finalModel) > 4/nrow(gt_2015_typical))
-which(cooks.distance(high_bc_linear_mod$finalModel) > 4/nrow(gt_2015_high))
+# which(cooks.distance(all_bc_linear_mod$finalModel) > .01)
+# which(cooks.distance(typical_bc_linear_mod$finalModel) > .1)
+# which(cooks.distance(high_bc_linear_mod$finalModel) > .2)
 ```
 
 
@@ -612,7 +437,7 @@ cv_info <- cv.tree(tree_CO, FUN = prune.tree)
 plot(cv_info$size, sqrt(cv_info$dev / nrow(train)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
 ```
 ```{r prune-tree-to-11-terminal-nodes}
-pruned_tree <- prune.tree(tree_CO, best = 11)
+pruned_tree <- prune.tree(tree_CO, best = 8)
 summary(pruned_tree)
 ```
 ```{r plot-pruned-tree}
@@ -629,7 +454,7 @@ abline(0, 1)
 ```
 
 
-#Typical Energy Yield (127-133)
+#Typical Energy Yield (127-134.5)
 ```{r}
 set.seed(10)
 train_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% sample_frac(0.8)
@@ -638,7 +463,7 @@ test_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% setdiff(train_typica
 ```{r}
 tree_CO_typical <- tree(CO ~ . , train_typical,
                         control = tree.control(nobs = length(train_typical$CO), 
-                                         minsize = 2, mindev=0.001), method = "recursive.partition")
+                                         minsize = 4, mindev=0.001), method = "recursive.partition")
 summary(tree_CO_typical)
 ```
 ```{r}
@@ -654,7 +479,7 @@ cv_info_typical <- cv.tree(tree_CO_typical, FUN = prune.tree)
 plot(cv_info_typical$size, sqrt(cv_info_typical$dev / nrow(train_typical)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
 ```
 ```{r}
-pruned_tree_typical <- prune.tree(tree_CO_typical, best = 5)
+pruned_tree_typical <- prune.tree(tree_CO_typical, best = 7)
 summary(pruned_tree_typical)
 ```
 ```{r}
@@ -680,7 +505,7 @@ test_high <- gt_2015_high %>% dplyr::select(-NOX) %>% setdiff(train_high)
 ```{r create-big-tree-high}
 tree_CO_high <- tree(CO ~ . , train_high,
                      control = tree.control(nobs = length(train_high$CO), 
-                                         minsize = 2, mindev=0.001), method = "recursive.partition")
+                                         minsize = 4, mindev=0.001), method = "recursive.partition")
 summary(tree_CO_high)
 ```
 ```{r plot-big-tree-high}
@@ -719,81 +544,9 @@ abline(0, 1)
 
 
 
-# Tree predicting high vs. low carbon monoxide output
-```{r}
-plot(gt_2015$CO, gt_2015$TEY, ylab = "Total Energy Yield", xlab = "Carbon Monoxide Output")
-abline(v = 17, col = "red")
-```
-```{r}
-data <- gt_2015 %>% mutate(Emissions = as.factor(ifelse(CO > 17, "High", "Low"))) %>% dplyr::select(-NOX)
-high_CO <- data %>% filter(CO > 17) %>% dplyr::select(-CO)
-low_CO <- data %>% dplyr::select(-CO) %>% setdiff(high_CO)
-
-set.seed(10)
-train <- bind_rows(low_CO %>% sample_frac(7/9), high_CO %>% sample_frac(7/9)) 
-test <- data %>% dplyr::select(-CO) %>% setdiff(train)
-```
-```{r}
-tree <- tree(Emissions ~ . , train, 
-                  control = tree.control(nobs = length(train$Emissions), 
-                                         minsize = 1))
-summary(tree)
-```
-```{r}
-plot(tree)
-text(tree, pretty = 0)
-```
-```{r}
-tree_pred <- predict(tree, train, type = "class")
-table(predicted = tree_pred, actual = train$Emissions)
-
-tree_pred <- predict(tree, test, type = "class")
-table(predicted = tree_pred, actual = test$Emissions)
-```
 
 
-# Tree predicting ratio of energy yield over carbon monoxide
-```{r}
-set.seed(10)
-# train <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% sample_frac(0.8)
-# test <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% setdiff(train)
-train <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% dplyr::select(-c(NOX, TEY, CO)) %>% sample_frac(0.8)
-test <- gt_2015 %>% mutate(Energy_CO_Ratio = TEY / CO) %>% dplyr::select(-c(NOX, TEY, CO)) %>% setdiff(train)
-```
-```{r}
-tree_Energy_CO_Ratio <- tree(Energy_CO_Ratio ~ . , train, 
-                  control = tree.control(nobs = length(train$Energy_CO_Ratio), 
-                                         minsize = 2, mindev=0.001), method = "recursive.partition")
-summary(tree_Energy_CO_Ratio)
-```
-```{r}
-plot(tree_Energy_CO_Ratio)
-text(tree_Energy_CO_Ratio, pretty = 0)
-```
-```{r}
-tree_pred <- predict(tree_Energy_CO_Ratio, test)
-RMSE(test$Energy_CO_Ratio, tree_pred)
-```
-```{r}
-cv_info <- cv.tree(tree_Energy_CO_Ratio, FUN = prune.tree) 
-plot(cv_info$size, sqrt(cv_info$dev / nrow(train)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
-```
-```{r}
-pruned_tree <- prune.tree(tree_Energy_CO_Ratio, best = 7)
-summary(pruned_tree)
-```
-```{r}
-plot(pruned_tree)
-text(pruned_tree, pretty = 0)
-```
-```{r}
-tree_pred <- predict(pruned_tree, test)
-RMSE(test$Energy_CO_Ratio, tree_pred)
-```
-```{r}
-plot(tree_pred, test$Energy_CO_Ratio, xlab = "Predicted", ylab = "Actual")
-abline(0, 1)
-```
+
 
 ```{r}
 library(knitr)
@@ -805,9 +558,9 @@ all_lass_rmse     <- max(all_lasso_mod$results$RMSE)
 typical_lass_rmse <- max(typical_lasso_mod$results$RMSE)
 high_lass_rmse    <- max(high_lasso_mod$results$RMSE)
 
-all_tree_rmse     <- 1
-typical_tree_rmse <- 1
-high_tree_rmse    <- 1
+all_tree_rmse     <- RMSE(test$CO, tree_pred)
+typical_tree_rmse <- RMSE(test_typical$CO, tree_pred_typical)
+high_tree_rmse    <- RMSE(test_high$CO, tree_pred_high)
 
 bc_all_rmse     <- all_bc_linear_mod$results$RMSE
 bc_typical_rmse <- typical_bc_linear_mod$results$RMSE
@@ -824,11 +577,11 @@ RMSE_Table <- matrix(c(round(all_linear_mod$results$RMSE        ,digits = 4),
                        round(max(all_lasso_mod$results$RMSE)    ,digits = 4),
                        round(max(typical_lasso_mod$results$RMSE),digits = 4),
                        round(max(high_lasso_mod$results$RMSE)   ,digits = 4),
-                       round(1                                  ,digits = 4),
-                       round(1                                  ,digits = 4),
-                       round(1                                  ,digits = 4 )) 
+                       round(all_tree_rmse                      ,digits = 4),
+                       round(typical_tree_rmse                  ,digits = 4),
+                       round(high_tree_rmse                     ,digits = 4 )) 
                      ,ncol=3, byrow=TRUE)
-colnames(RMSE_Table) <- c("Overall Production Range", "Typical Production Range (127-133)", "High Production Range (160+)")
+colnames(RMSE_Table) <- c("Overall Production Range", "Typical Production Range (127-134.5)", "High Production Range (160+)")
 rownames(RMSE_Table) <- c("Linear Regression", "Box-Cox Transformed", "Lasso", "Decision Tree" )
 RMSE_Table <- as.table(RMSE_Table)
 RMSE_Table <- kable(RMSE_Table)
