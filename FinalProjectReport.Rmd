@@ -476,3 +476,14 @@ Correlation is a statistical measure that measures which two variables are linea
 $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 
 [[**Source**]](https://www.geeksforgeeks.org/python-pearson-correlation-test-between-two-variables/)
+
+
+Individual Contributions:
+
+Aayushi:
+
+Kyle:
+
+Rosa:
+
+Ruben
