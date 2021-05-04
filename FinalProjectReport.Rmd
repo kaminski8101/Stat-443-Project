@@ -92,85 +92,66 @@ set.seed(10)
 # Set 5-fold cross validation
 cv_5 <- trainControl(method = "cv", number = 5)
 
-# AIC stepwise selected linear models 
-all_linear_mod <- train(
-          form = CO ~ . - NOX - TIT - CDP - TEY ,
-          data = gt_2015,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          trace = FALSE
-)
-all_linear_mod_lm <- lm(CO ~ AT + AH + AFDP + GTEP + TAT, data = gt_2015)
-typical_linear_mod <- train(
-          form = CO ~ . - NOX - TIT - AT,
-          data = gt_2015_typical,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          trace = FALSE
-)
-typical_linear_mod_lm <- lm(CO ~ AP + AH + AFDP + GTEP + TAT + TEY + CDP, data = gt_2015_typical)
-high_linear_mod <- train(
-          form = CO ~ . - NOX - TEY - CDP,
-          data = gt_2015_high,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          trace = FALSE
-)
-high_linear_mod_lm <- lm(CO ~ AT + AFDP + GTEP + TIT + TAT, data =  gt_2015_high)
-
-# Lasso models
-all_lasso_mod <- train(
-          form = CO ~ . - NOX - TIT - CDP - TEY ,
-          data = gt_2015,
-          method = "lasso",
-          trControl = cv_5
-)
-typical_lasso_mod <- train(
-          form = CO ~ . - NOX - TIT - AT,
-          data = gt_2015_typical,
-          method = "lasso",
-          trControl = cv_5
-)
-high_lasso_mod <- train(
-          form = CO ~ . - NOX - TEY - CDP,
-          data = gt_2015_high,
-          method = "lasso",
-          trControl = cv_5
-)
-
-# Box-Cox Transformed Models
-all_bc_linear_mod <- train(
-          form = CO^(.2) ~ . - NOX  - TIT - CDP - TEY ,
-          data = gt_2015,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          nvmax = 10,
-          trace = FALSE
-)
-typical_bc_linear_mod <- train(
-          form = CO^(.6) ~ . - NOX - TIT - AT,
-          data = gt_2015_typical,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          nvmax = 10,
-          trace = FALSE
-)
-high_bc_linear_mod <- train(
-          form = CO^(1.9) ~ . - NOX - TEY - CDP,
-          data = gt_2015_high,
-          method = "lmStepAIC",
-          trControl = cv_5,
-          nvmax = 10,
-          trace = FALSE
-)
-
-# Decision Trees
 train_all <- gt_2015 %>% dplyr::select(-NOX) %>% sample_frac(0.8)
 test_all <- gt_2015 %>% dplyr::select(-NOX) %>% setdiff(train_all)
 train_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% sample_frac(0.8)
 test_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% setdiff(train_typical)
 train_high <- gt_2015_high %>% dplyr::select(-NOX) %>% sample_frac(0.8)
 test_high <- gt_2015_high %>% dplyr::select(-NOX) %>% setdiff(train_high)
+
+# AIC stepwise selected linear models 
+all_linear_mod <- train(
+          form = CO ~ . - TIT - CDP - TEY ,
+          data = train_all,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+typical_linear_mod <- train(
+          form = CO ~ . - TIT - AT,
+          data = train_typical,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+high_linear_mod <- train(
+          form = CO ~ . - TEY - CDP,
+          data = train_high,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+all_linear_mod_lm <- lm(CO ~ AT + AH + AFDP + GTEP + TAT, data = test_all)
+typical_linear_mod_lm <- lm(CO ~ AP + AH + AFDP + GTEP + TAT + TEY + CDP, data = test_typical)
+high_linear_mod_lm <- lm(CO ~ AT + AFDP + GTEP + TIT + TAT, data =  test_high)
+linear_pred_all <- predict(all_linear_mod_lm, test_all)
+linear_pred_typical <- predict(typical_linear_mod_lm, test_typical)
+linear_pred_high <- predict(high_linear_mod_lm, test_high)
+
+# Lasso models
+all_lasso_mod <- train(
+          form = CO ~ . - TIT - CDP - TEY ,
+          data = train_all,
+          method = "lasso",
+          trControl = cv_5
+)
+typical_lasso_mod <- train(
+          form = CO ~ . - TIT - AT,
+          data = train_typical,
+          method = "lasso",
+          trControl = cv_5
+)
+high_lasso_mod <- train(
+          form = CO ~ . - TEY - CDP,
+          data = train_high,
+          method = "lasso",
+          trControl = cv_5
+)
+lasso_pred_all <- predict(all_lasso_mod, test_all)
+lasso_pred_typical <- predict(typical_lasso_mod, test_typical)
+lasso_pred_high <- predict(high_lasso_mod, test_high)
+
+# Decision Trees
 tree_CO_all <- tree(CO ~ . , train_all, 
                   control = tree.control(nobs = length(train_all$CO), 
                                          minsize = 4, mindev=0.001), method = "recursive.partition")
@@ -257,14 +238,14 @@ For all of our models, we split our data into training and testing datasets to a
 
 In the table below, the decision tree outperforms linear regression and lasso in the overall production range, typical production range, and high production range. Therefore, we decided to use the Decision Tree Model to examine the biggest impact on emission levels in order to decrease emissions overall. 
 
-```{r include = FALSE}
-all_linear_rmse     <- all_linear_mod$results$RMSE
-typical_linear_rmse <- typical_linear_mod$results$RMSE
-high_linear_rmse    <- high_linear_mod$results$RMSE
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+all_linear_rmse     <- RMSE(test_all$CO, linear_pred_all)
+typical_linear_rmse <- RMSE(test_typical$CO, linear_pred_typical)
+high_linear_rmse    <- RMSE(test_high$CO, linear_pred_high)
 
-all_lass_rmse     <- max(all_lasso_mod$results$RMSE)
-typical_lass_rmse <- max(typical_lasso_mod$results$RMSE)
-high_lass_rmse    <- max(high_lasso_mod$results$RMSE)
+all_lass_rmse     <- RMSE(test_all$CO, lasso_pred_all)
+typical_lass_rmse <- RMSE(test_typical$CO, lasso_pred_typical)
+high_lass_rmse    <- RMSE(test_high$CO, lasso_pred_high)
 
 all_tree_rmse     <- RMSE(test_all$CO, tree_pred_all)
 typical_tree_rmse <- RMSE(test_typical$CO, tree_pred_typical)
@@ -285,6 +266,22 @@ RMSE_Table <- matrix(c(round(all_linear_mod$results$RMSE        ,digits = 4),
 colnames(RMSE_Table) <- c("Overall Production Range", "Typical Production Range (127-134.5)", "High Production Range (160+)")
 rownames(RMSE_Table) <- c("Linear Regression", "Lasso", "Decision Tree" )
 RMSE_Table <- kable(as.table(RMSE_Table))
+
+
+RMSE_Table <- matrix(c(round(all_linear_rmse    ,digits = 4),
+                       round(typical_linear_rmse,digits = 4),
+                       round(high_linear_rmse   ,digits = 4),
+                       round(all_lass_rmse      ,digits = 4),
+                       round(typical_lass_rmse  ,digits = 4),
+                       round(high_lass_rmse     ,digits = 4),
+                       round(all_tree_rmse      ,digits = 4),
+                       round(typical_tree_rmse  ,digits = 4),
+                       round(high_tree_rmse     ,digits = 4 )) 
+                     ,ncol=3, byrow=TRUE)
+colnames(RMSE_Table) <- c("Overall Production Range", "Typical Production Range (127-134.5)", "High Production Range (160+)")
+rownames(RMSE_Table) <- c("Linear Regression", "Lasso", "Decision Tree" )
+RMSE_Table <- as.table(RMSE_Table)
+RMSE_Table <- kable(RMSE_Table)
 RMSE_Table
 ```
 
