@@ -2,7 +2,7 @@
 title: |
   | \vspace{7cm} \LARGE{Gas Turbine CO Emission Analysis}
 author: "Aayushi Gupta, Kyle Kaminski, Rosa Lin, Ruben Martinez"
-date: "5/5/2021"
+date: "Client: Darren Glosemeyer"
 output: 
   pdf_document:
     extra_dependencies: ["float"]
@@ -24,11 +24,11 @@ The combined cycle power plant, also known as combined cycle gas turbine plant, 
 
 We are interested in identifying the process variables that impact carbon monoxide emissions. By determining the process variables that impact carbon monoxide emissions, we will be able to find opportunities to reduce carbon monoxide emissions. 
 
-Our plan is to analyze a dataset that contains 7384 instances of 11 sensor measures that have been aggregated over one hour (by means of average or sum) from a gas turbine located in Turkey for the purpose of studying flue gas emissions, namely CO and NOx (NO and NO2). The data comes from the same power plant as the dataset [(**Source**)](https://archive.ics.uci.edu/ml/datasets/Gas+Turbine+CO+and+NOx+Emission+Data+Set) used for predicting hourly net energy yield. By contrast, this data is collected in another data range (01.01.2011 - 31.12.2015), includes gas turbine parameters (such as Turbine Inlet Temperature and Compressor Discharge pressure) in addition to the ambient variables. Note that the dates are not given in the instances but the data are sorted in chronological order. See the attribute information and [**relevant paper**](https://journals.tubitak.gov.tr/elektrik/issues/elk-19-27-6/elk-27-6-54-1807-87.pdf) for details. Kindly follow the protocol mentioned in the paper (using the first three years' data for training/ cross-validation and the last two for testing) for reproducibility and comparability of works. The dataset can be well used for predicting turbine energy yield (TEY) using ambient variables as features.
+Our plan is to analyze a dataset that contains 7384 instances of 11 sensor measures that have been aggregated over one hour (by means of average or sum) from a gas turbine located in Turkey for the purpose of studying flue gas emissions, namely CO and NOx (NO and NO2). The data comes from the same power plant as the dataset used for predicting hourly net energy yield. By contrast, this data is collected in another data range (01.01.2011 - 31.12.2015), includes gas turbine parameters (such as Turbine Inlet Temperature and Compressor Discharge pressure) in addition to the ambient variables. Note that the dates are not given in the instances but the data are sorted in chronological order. See the attribute information and [**relevant paper**](https://journals.tubitak.gov.tr/elektrik/issues/elk-19-27-6/elk-27-6-54-1807-87.pdf) for details. Kindly follow the protocol mentioned in the paper (using the first three years' data for training/ cross-validation and the last two for testing) for reproducibility and comparability of works. The dataset can be well used for predicting turbine energy yield (TEY) using ambient variables as features.
 
 ## Goal 
 
-The goal for this project is to utilize this data set for the purpose of studying flue gas emissions, specifically carbon monoxide(CO) and nitrogen oxides (NOx). However, our client did tell us to not consider nitrogen oxide, so we will only be focusing on carbon monoxide in this report. Our focus will be to find statistically significant relationships between the ambient and turbine variables and the emissions variables. We will limit the size of our model to more clearly demonstrate these relationships. Ultimately, we will suggest which variables make the biggest impact on emission levels in order to decrease emissions overall. 
+The goal for this project is to utilize this data set for the purpose of studying flue gas emissions, specifically carbon monoxide(CO) and nitrogen oxides (NOx). However, our client did tell us to not consider nitrogen oxide, so we will only be focusing on carbon monoxide in this report. Our focus will be to find statistically significant relationships between the ambient, turbine, and emissions variables. We will limit the size of our model to more clearly demonstrate these relationships. Ultimately, we will suggest which variables make the biggest impact on emission levels in order to decrease emissions overall. 
 
 ## Gas Turbine CO and NOx Emission Data Set
 
@@ -36,7 +36,7 @@ The data comes from a gas turbine located in Turkey that studies the flue gas em
 
 ### Description 
 
-The data file `gt_2015.csv` has 7384 observations and 11 variables from the UCI Gas Turbine CO and NOx Emission Data Set. We are going to explore and analyze the following variables (more details in Appendices 1): 
+The data file `gt_2015.csv` has 7384 observations and 11 variables from the [**UCI Gas Turbine CO and NOx Emission Data Set**](https://archive.ics.uci.edu/ml/datasets/Gas+Turbine+CO+and+NOx+Emission+Data+Set). We are going to explore and analyze the following variables (more details in Appendices 1): 
 
 * AT - Ambient Temperature
 * AP - Ambient Pressure
@@ -111,12 +111,34 @@ Since we were able to anticipate variables that could cause some problems in our
 * CDP 
 * TEY 
 
-For all of our models, we split our data into training and testing dataset to avoid overfitting the models. By doing so, we minimized the effects of data discrepancies and effectively evaluated our models. 
+
+## Model Selection 
+
+We decided to examine three different models to make sure that the model we selected was the most useful and effective way of analyzing the data set. The three models we used were **Multiple Linear Regression**, **Lasso**, and **Decision Trees**. 
+
+### RMSE
+
+In order to determine which model was the most effective, we compared the RMSE of multiple linear regression, lasso, and decision tree models. Root Mean Squared Errors are the standard deviation of residuals. Residuals are a measure of how far from the regression line data points are. The point of calculating the RMSE is to measure how spread out these variables are. The rule of thumb is, the lower the RMSE, the better. 
+
+### Training and Testing Data
+
+For all of our models, we split our data into training and testing datasets to avoid overfitting the models. By doing so, we minimized the effects of data discrepancies and effectively evaluated our models. 
 
 
 \newpage 
 
 # Results
+
+## Decision Tree Model Selection 
+
+In the table below, the decision tree outperforms linear regression and lasso in the overall production range, typical production range, and high production range. Therefore, we decided to use the Decision Tree Model to examine the biggest impact on emission levels in order to decrease emissions overall. 
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+tab <- matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA), ncol=3, byrow=TRUE)
+colnames(tab) <- c('Overall Production Range','Typical Production Range (127-133)','High Production Range (160+)')
+rownames(tab) <- c('Linear Regression','Lasso','Decision Tree')
+knitr::kable(as.table(tab), digits = 2, caption = "RMSE Values Between Different Models and Ranges")
+```
 
 ## Overall Decision Tree Model
 
@@ -211,19 +233,19 @@ invisible(vif(fourth_model_all))
 initial_all_linear_model <- fourth_model_all
 ```
 
-VIF for overall production range 
+**VIF for overall production range** 
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 vif(initial_all_linear_model)
 ```
 
-VIF for typical production range 
+**VIF for typical production range** 
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 vif(initial_typical_linear_model)
 ```
 
-VIF for high production range
+**VIF for high production range**
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 vif(initial_high_linear_model)
@@ -274,4 +296,3 @@ Correlation is a statistical measure that measures which two variables are linea
 $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 
 [[**Source**]](https://www.geeksforgeeks.org/python-pearson-correlation-test-between-two-variables/)
-
