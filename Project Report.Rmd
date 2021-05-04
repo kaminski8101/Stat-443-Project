@@ -795,3 +795,43 @@ plot(tree_pred, test$Energy_CO_Ratio, xlab = "Predicted", ylab = "Actual")
 abline(0, 1)
 ```
 
+```{r}
+library(knitr)
+all_linear_rmse     <- all_linear_mod$results$RMSE
+typical_linear_rmse <- typical_linear_mod$results$RMSE
+high_linear_rmse    <- high_linear_mod$results$RMSE
+
+all_lass_rmse     <- max(all_lasso_mod$results$RMSE)
+typical_lass_rmse <- max(typical_lasso_mod$results$RMSE)
+high_lass_rmse    <- max(high_lasso_mod$results$RMSE)
+
+all_tree_rmse     <- 1
+typical_tree_rmse <- 1
+high_tree_rmse    <- 1
+
+bc_all_rmse     <- all_bc_linear_mod$results$RMSE
+bc_typical_rmse <- typical_bc_linear_mod$results$RMSE
+bc_high_rmse    <- high_bc_linear_mod$results$RMSE
+
+  
+
+RMSE_Table <- matrix(c(round(all_linear_mod$results$RMSE        ,digits = 4),
+                       round(typical_linear_mod$results$RMSE    ,digits = 4),
+                       round(high_linear_mod$results$RMSE       ,digits = 4),
+                       round(all_bc_linear_mod$results$RMSE     ,digits = 4),
+                       round(typical_bc_linear_mod$results$RMSE ,digits = 4),
+                       round(high_bc_linear_mod$results$RMSE    ,digits = 4),
+                       round(max(all_lasso_mod$results$RMSE)    ,digits = 4),
+                       round(max(typical_lasso_mod$results$RMSE),digits = 4),
+                       round(max(high_lasso_mod$results$RMSE)   ,digits = 4),
+                       round(1                                  ,digits = 4),
+                       round(1                                  ,digits = 4),
+                       round(1                                  ,digits = 4 )) 
+                     ,ncol=3, byrow=TRUE)
+colnames(RMSE_Table) <- c("Overall Production Range", "Typical Production Range (127-133)", "High Production Range (160+)")
+rownames(RMSE_Table) <- c("Linear Regression", "Box-Cox Transformed", "Lasso", "Decision Tree" )
+RMSE_Table <- as.table(RMSE_Table)
+RMSE_Table <- kable(RMSE_Table)
+RMSE_Table
+```
+
