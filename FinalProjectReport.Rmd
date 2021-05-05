@@ -221,7 +221,7 @@ plot(original_data$CO, xlab = "Index", ylab = "CO", main = "Figure 3: Extreme CO
 abline(h = 15, lty = 1, col = "red")
 ```
 
-We quickly encountered some issues with the data collected from the power plant. As you can see from Figure 3 above, there are several CO values which deviate significantly from the rest of the values. These outliers look to be somewhat random in Figure 3, but after some investigating we found that the observations with extreme CO values typically fell into one of two categories (see Appendix 7). After appropriately dealing with the observations that fell into each category, we found the CO values to be much more reasonable as is evident in Figure 4.
+We quickly encountered some issues with the data collected from the power plant. As you can see from Figure 3 above, there are several CO values which deviate significantly from the rest of the values. These outliers look to be somewhat random in Figure 3, but after some investigating we found that the observations with extreme CO values typically fell into one of two categories (see Appendix 8). After appropriately dealing with the observations that fell into each category, we found the CO values to be much more reasonable as is evident in Figure 4.
 
 &nbsp;
 &nbsp;
@@ -358,7 +358,7 @@ Based on our results, the following variables are the most sensitive process var
 * TEY
 
 
-## Recommendations
+## Process Variables Impact on CO
 
 1. Overall Production Range: Higher TAT, AT, and AFDP values will lower CO outputs. 
 
@@ -366,25 +366,31 @@ Based on our results, the following variables are the most sensitive process var
 
 3. High Production Range (160+): Higher TEY and lower TAT will lower CO outputs. 
 
-##Suggestions 
+## Recommendations
 
-1. We recommend the client to modify AFDP. 
+1. Explore possible ways to increase AFDP. 
 
-2. In the future, it would be great if the client could expand their typical production range since the original typical production range did not accurately capture the range. 
+2. Ensure the typical production range that was supplied to us is the correct range.
 
-3. Client should check with the scientists beforehand to check if any outliers are entered correctly. 
+3. Client should make sure all data is entered correctly and note any events which require the turbines to shut down. 
 
 \newpage
 
 # Appendix
 
 
-Extending description of variables 
+## 1. Extended description of variables 
 
-[insert image]
+The table below shows the full description of variables not included in our description. 
+
+\begin{figure}[H]
+\centering
+\includegraphics{./images/Variable_description.png}
+\caption{Variable Description}
+\end{figure}
 
 
-## 1. Multiple Linear Regression
+## 2. Multiple Linear Regression
 
 We will create a multiple linear regression model using the feature variables remaining after preparing our data -- AT, AP, AH, AFDP, GTEP, and TAT. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $\beta$ using:
 
@@ -399,7 +405,7 @@ Key assumptions are stated as:
 * **E**qual Variance: the error variance is the same. 
 
 
-## 2. Lasso 
+## 3. Lasso 
 
 The Lasso model is similar in structure to the linear model, but it differs in how the variable selection process is treated. Lasso models often perform better than a simple/multiple linear regression because the Lasso model can penalize unimportant variables by shrinking their corresponding coefficients, which decreases the influence those variables have on the model. This is preferable over the linear regression model because the variance can be decreased without largely impacting the model’s bias.
 
@@ -407,7 +413,7 @@ $$\sum_{i=1}^{n} \Big(y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{ij}\Big)^2 + \la
 
 [[**Source**]](https://statisticallearning.org/regularization.html)
 
-## 3. Decision Tree 
+## 4. Decision Tree 
 
 Decision trees are nonparametric models and work by taking in all of the characteristics of the observations, and then splitting the data into separate groups based on the optimal splitting characteristics. These models are called decision tree models because each split can be thought of as a branch in a tree. The leaves are thus called terminal nodes in this model because that is where the model outputs the prediction based on all the splitting criteria up until that point. A decision tree can be used to predict both categorical outcomes and quantitative outcomes. In this analysis, we are looking for a numeric outcome so a regression tree is used. 
 
@@ -416,7 +422,7 @@ $$\textrm{Gini}(K) = \sum_{i \in N} P_{i,K}(1-P_{i,K}) = 1 - \sum_{i \in N} P^2_
 [[**Source**]](https://medium.com/the-owl/k-fold-cross-validation-in-keras-3ec4a3a00538)
 
 
-## 4. Model Training and Testing Procedure
+## 5. Model Training and Testing Procedure
 
 All of our models were built following the same procedure. We first split the provided data set into training and testing data sets, with 80% of the data randomly assigned to the training data and the remaining 20% assigned to the testing data. We built every comparable model on the same training data as well as tested every comparable model on the same testing data. We did this so we would not risk a model outperforming another from chance due to being applied to a different subset of the original data. All models were also trained using Cross Validation. Cross Validation lowers a models dependency on the data it is trained on by splitting the data into k different subsets (in our case, 5) and training the model k times, each time using k-1 subsets to train the model and the final subset to test the models performance. The k different models built are then averaged together to a single model which is not over fit to the training data. The figure below visually illustrates the process that we followed.
 
@@ -428,7 +434,7 @@ All of our models were built following the same procedure. We first split the pr
 [[**Source**]](https://medium.com/the-owl/k-fold-cross-validation-in-keras-3ec4a3a00538)
 
 
-## 5. Variance Inflation Factor (VIF)
+## 6. Variance Inflation Factor (VIF)
 
 Variance Inflation Factor detects multicollinearity in regression analysis. Multicollinearity is when two or more predictors are linearly associated. Linear associations between predictors can cause issues in linear regression results because we assume that independent variables are independent of one another. Linearly related predictors move very similarly, this means we can not really infer that an change in one predictor will impact the outcome by a certain amount because the correlated predictor will also move! Fortunately, we can figure out which predictors are most responsible for multicollinearity issues by checking their VIF values (high VIF values indicate issues with that predictor). We set the VIF cutoff at a value of 10, removing the highest VIF predictor variables one by one until all had VIF values less than 10. It is important to emphasize that only linearly based models are effected by multicollinearity, so we only removed predictor variables that caused issues in linear based models.
 
@@ -489,7 +495,7 @@ vif(initial_high_linear_model)
 We preprocessed our data by using Variance Inflation Factor (VIF) to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model. Since we were able to anticipate variables that could cause some problems in our linear based analyses due to collinearity, we decided to remove the following variables from our linear based models for the overall production range: TIT, CDP, and TEY. For our typical production range we removed TIT and AT while for our high production range we removed TEY and CDP. 
 
 
-## 6. Correlations
+## 7. Correlations
 
 Correlation is a statistical measure that measures which two variables are linearly related. It is commonly used to describe simple relationships without discussing the cause and effect.
 
@@ -498,7 +504,7 @@ $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 [[**Source**]](https://www.geeksforgeeks.org/python-pearson-correlation-test-between-two-variables/)
 
 
-## 7. Carbon Monoxide Extreme Values
+## 8. Carbon Monoxide Extreme Values  
 
 &nbsp;
 &nbsp;
@@ -531,27 +537,7 @@ original_data[c(seq(3977-3,3977+4)),-11] %>%
 The observations that had high CO values but did not show any evidence of a shock to the process variables all indicated a different relationship. The figure above shows an example of two observations, again highlighted in red, which we found a possible explanation for their extreme CO values. It is obvious that the CO values belonging to the two observations in question are vastly different from their neighbor observations despite all the process variables being very similar. If you divide their CO values by 10 (move the decimal once to the left), the CO values of the two observations suddenly look right. We believe that the observations like these in the data could have been incorrectly entered. One explanation for this is if the data is manually entered, the employee entering the data could have accidentally made this error. We decided to change the observations which fit this explanation by dividing them by 10. There were 9 observations that were impacted by this. 
 
 
-## 8. Ambient Temperature Plots
-
-&nbsp;
-&nbsp;
-
-```{r,  message=FALSE, echo=FALSE, warning=FALSE, fig.width=10,fig.height=5}
-model = lm(gt_2015$AT ~ gt_2015$TEY)
-ggplot(model, aes(x = gt_2015$TEY, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Total Energy Yield") + labs(y = "Ambient Temperature") + labs(title = "Figure 6: Relationship between Total Energy Yield & Ambient Temperature")
-```
-
-&nbsp;
-&nbsp;
-
-```{r,  message=FALSE, echo=FALSE, warning=FALSE, fig.width=10,fig.height=5}
-model2 = lm(gt_2015$AT ~ gt_2015$CO)
-ggplot(model, aes(x = gt_2015$CO, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Carbon Monoxide") + labs(y = "Ambient Temperature") + labs(title = "Figure 7: Relationship between Carbon Monoxide & Ambient Temperature")
-```
-
-Figures 6 and 7 above help further explain the why higher AT result in lower CO outputs. Figure 6 shows no clear trend with TEY values less than around 145, but a clear negative trend when the TEY values are above 145. This shows the extreme TEY values are impacted by AT, likely because at very high temperatures the machines can not work as hard or they will overheat. Figure 7 on the bottom shows AT against CO, where we see 9 CO values greater than 17 whereas the other 7300 observations are less. 
-
-## Individual Contributions
+## 9. Individual Contributions
 
 **Aayushi**
 
