@@ -259,6 +259,9 @@ In order to determine which model was the most effective, we compared the RMSE o
 
 For all of our models, we split our data into training and testing datasets to avoid overfitting the models. By doing so, we minimized the effects of data discrepancies and effectively evaluated our models. 
 
+###K-Fold Cross-Validation
+
+When evaluating our models we used 5-Fold Cross-Validation. This minimizes the effect that a single train-test split has on our model. Instead of being highly dependent on a single train-test split of our data we average the results of five different train-test splits when evaluating or model. This results in a better generalized model that is not overfitted on our data. 
 
 \newpage 
 
