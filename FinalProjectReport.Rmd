@@ -302,22 +302,6 @@ This decision tree represents our final tree model that was trained on the typic
 
 This decision tree represents our final tree model that was built on the high production range data with TEY values over 160. This tree argues that higher AFDP values on average result in lower CO output because the average value of the nodes on the right side is lower than those on the left. Unlike our previous models, AT does not show a very strong relationship with the CO output values. **Higher TEY and lower TAT** values look to have lower CO outputs. 
 
-## Tree Model Explanations 
-
-### Ambient Temperature Plots
-
-```{r,  message=FALSE, echo=FALSE, warning=FALSE}
-model = lm(gt_2015$AT ~ gt_2015$TEY)
-ggplot(model, aes(x = gt_2015$TEY, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Total Energy Yield") + labs(y = "Ambient Temperature") + labs(title = "Figure 6: Relationship between Total Energy Yield and Ambient Temperature")
-```
-
-```{r,  message=FALSE, echo=FALSE, warning=FALSE}
-model2 = lm(gt_2015$AT ~ gt_2015$CO)
-ggplot(model, aes(x = gt_2015$CO, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Carbon Monoxide") + labs(y = "Ambient Temperature") + labs(title = "Figure 7: Relationship between Carbon Monoxide and Ambient Temperature")
-```
-
-
-Figures 6 and 7 above help further explain the why higher AT result in lower CO outputs. Figure 6 shows no clear trend with TEY values less than around 145, but a clear negative trend when the TEY values are above 145. This shows the extreme TEY values are impacted by AT, likely because at very high temperatures the machines can not work as hard or they will overheat. Figure 7 on the bottom shows AT against CO, where we see 9 CO values greater than 17 whereas the other 7300 observations are less. 
 
 \newpage
 
@@ -327,18 +311,24 @@ Figures 6 and 7 above help further explain the why higher AT result in lower CO 
 
 Based on our results, the following variables are the most sensitive process variables for the overall production range:
 
-* NA
-* NA
+* AFDP
+* AP
+* TAT
+* TIT
+
 
 Based on our results, the following variables are the most sensitive process variables for the typical production range (127 - 134.5):
 
-* NA
-* NA
+* AT
+* GETP
+* TIT
 
 Based on our results, the following variables are the most sensitive process variables for the high production range (160+):
 
-* NA
-* NA
+* AFDP
+* AT
+* TAT
+* TEY
 
 As you can see...
 
@@ -350,7 +340,7 @@ As you can see...
 
 # Appendix
 
-## Multiple Linear Regression
+## 1. Multiple Linear Regression
 
 We will create a multiple linear regression model using the feature variables remaining after preparing our data -- AT, AP, AH, AFDP, GTEP, and TAT. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $\beta$ using:
 
@@ -364,16 +354,27 @@ Key assumptions are stated as:
 * **N**ormality: the distribution of the errors follow a normal distribution.
 * **E**qual Variance: the error variance is the same. 
 
-We will then use model selection using VIF to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model.
 
-
-## Lasso 
+## 2. Lasso 
 
 The Lasso model is similar in structure to the linear model, but it differs in how the variable selection process is treated. Lasso models often perform better than a simple/multiple linear regression because the Lasso model can penalize unimportant variables by shrinking their corresponding coefficients, which decreases the influence those variables have on the model. This is preferable over the linear regression model because the variance can be decreased without largely impacting the model’s bias.
 
 $$\sum_{i=1}^{n} \Big(y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{ij}\Big)^2 + \lambda \sum_{j=1}^{p} |\beta_j|$$
 
-## Variance Inflation Factor (VIF)
+[[**Source**]](https://statisticallearning.org/regularization.html)
+
+## 3. Decision Tree 
+
+Decision trees are nonparametric models and work by taking in all of the characteristics of the observations, and then splitting the data into separate groups based on the optimal splitting characteristics. These models are called decision tree models because each split can be thought of as a branch in a tree. The leaves are thus called terminal nodes in this model because that is where the model outputs the prediction based on all the splitting criteria up until that point. A decision tree can be used to predict both categorical outcomes and quantitative outcomes. In this analysis, we are looking for a numeric outcome so a regression tree is used. 
+
+
+$$\textrm{Gini}(K) = \sum_{i \in N} P_{i,K}(1-P_{i,K}) = 1 - \sum_{i \in N} P^2_{i,K}$$
+
+
+[[**Source**]]()
+
+
+## 4. Variance Inflation Factor (VIF)
 
 Variance Inflation Factor detects multicollinearity in regression analysis. Multicollinearity is when the correlation between predictors affects regression results. We only used VIF in our linear based models.
 
@@ -433,20 +434,7 @@ vif(initial_high_linear_model)
 
 
 
-[[**Source**]](https://statisticallearning.org/regularization.html)
-
-
-## Decision Tree 
-
-Decision trees are nonparametric models and work by taking in all of the characteristics of the observations, and then splitting the data into separate groups based on the optimal splitting characteristics. These models are called decision tree models because each split can be thought of as a branch in a tree. The leaves are thus called terminal nodes in this model because that is where the model outputs the prediction based on all the splitting criteria up until that point. A decision tree can be used to predict both categorical outcomes and quantitative outcomes. In this analysis, we are looking for a numeric outcome so a regression tree is used. 
-
-
-$$\textrm{Gini}(K) = \sum_{i \in N} P_{i,K}(1-P_{i,K}) = 1 - \sum_{i \in N} P^2_{i,K}$$
-
-
-[[**Source**]]()
-
-## Correlations
+## 5. Correlations
 
 Correlation is a statistical measure that measures which two variables are linearly related. It is commonly used to describe simple relationships without discussing the cause and effect.
 
@@ -455,7 +443,21 @@ $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 [[**Source**]](https://www.geeksforgeeks.org/python-pearson-correlation-test-between-two-variables/)
 
 
-Individual Contributions:
+## 6. Ambient Temperature Plots
+
+```{r,  message=FALSE, echo=FALSE, warning=FALSE}
+model = lm(gt_2015$AT ~ gt_2015$TEY)
+ggplot(model, aes(x = gt_2015$TEY, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Total Energy Yield") + labs(y = "Ambient Temperature") + labs(title = "Figure 6: Relationship between Total Energy Yield & Ambient Temperature")
+```
+
+```{r,  message=FALSE, echo=FALSE, warning=FALSE}
+model2 = lm(gt_2015$AT ~ gt_2015$CO)
+ggplot(model, aes(x = gt_2015$CO, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Carbon Monoxide") + labs(y = "Ambient Temperature") + labs(title = "Figure 7: Relationship between Carbon Monoxide & Ambient Temperature")
+```
+
+Figures 6 and 7 above help further explain the why higher AT result in lower CO outputs. Figure 6 shows no clear trend with TEY values less than around 145, but a clear negative trend when the TEY values are above 145. This shows the extreme TEY values are impacted by AT, likely because at very high temperatures the machines can not work as hard or they will overheat. Figure 7 on the bottom shows AT against CO, where we see 9 CO values greater than 17 whereas the other 7300 observations are less. 
+
+## Individual Contributions:
 
 Aayushi:
 
