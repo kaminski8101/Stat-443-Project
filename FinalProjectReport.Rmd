@@ -20,7 +20,7 @@ library(tidyverse)
 library(tree)
 library(knitr)
 library(faraway)
-library(DT)
+library(kableExtra)
 
 # Create RMSE function
 RMSE <- function(y, y_hat) {
@@ -210,6 +210,9 @@ The typical production range the client provided did not fully capture the typic
 
 ### Carbon Monoxide Extreme Values
 
+&nbsp;
+&nbsp;
+
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 original_data <- read_csv("Project Data/gt_2015.csv")
 
@@ -219,6 +222,9 @@ abline(h = 15, lty = 1, col = "red")
 ```
 
 We quickly encountered some issues with the data collected from the power plant. As you can see from Figure 3 above, there are several CO values which deviate significantly from the rest of the values. These outliers look to be somewhat random in Figure 3, but after some investigating we found that the observations with extreme CO values typically fell into one of two categories (see Appendix 7). After appropriately dealing with the observations that fell into each category, we found the CO values to be much more reasonable as is evident in Figure 4.
+
+&nbsp;
+&nbsp;
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 plot(gt_2015$CO, xlab = "Index", ylab = "CO", main = "Figure 4: CO Values",
@@ -494,25 +500,34 @@ $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 
 ## 7. Carbon Monoxide Extreme Values
 
+&nbsp;
+&nbsp;
+
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 # 115,116,117,118,119,120,121,626,1009,1301,1709,1710,1711,1712,1713,1796
 
-datatable(original_data[c(seq(1009-4,1009+4)),-11]) %>%
-  formatStyle(columns = "CO", 
-              target = "row",
-              background = styleInterval(cuts = 15, c("white","red"))) 
+original_data[c(seq(1009-4,1009+4)),-11] %>% 
+  kable(booktabs = T) %>%
+  kable_styling() %>%
+  row_spec(5, bold = T, background = "red")
 ```
-The first relationship that we found between observations with extreme CO values was a shock to their TIT, TAT, and TEY values. In the figure above, the row with an extreme CO value is highlighted in red. Comparing that observation with the neighbor observations above and below, it can be seen that the observation had a drop in TIT, TAT, and TEY values while all other values (except for CO of course) stayed relatively constant. We believe that this was due to some sort of malfunction or temporary shutdown of the turbines, which would explain why the turbine related temperatures and the energy yield dropped significantly for a short time period. The high CO could be explained by the turbine starting back up after the shut down, which would likely require significantly more energy than a running machine and produce high amounts of CO. These observations are not relevant to analyzing which process variables are directly related to CO output as their CO values are likely heavily influenced by some outside factor not accounted for in our data. Therefore, we chose to remove the observations which fit this explanation. 16 observations were removed.
+
+The first relationship that we found between observations with extreme CO values was a shock to their TIT, TAT, and TEY values. In the figure above, the row with an extreme CO value is highlighted in red. Comparing that observation with the neighbor observations above and below, it can be seen that the observation had a drop in TIT, TAT, and TEY values while all other values (except for CO of course) stayed relatively constant. We believe that this was due to some sort of malfunction or temporary shutdown of the turbines, which would explain why the turbine related temperatures and the energy yield dropped significantly for a short time period. The high CO could be explained by the turbine starting back up after the shut down, which would likely require significantly more energy than a running machine and produce high amounts of CO. These observations are not relevant to analyzing which process variables are directly related to CO output as their CO values are likely heavily influenced by some outside factor not accounted for in our data. Therefore, we chose to remove the observations which fit this explanation. 16 observations were removed.  
  
  
+&nbsp;
+&nbsp;
+
+
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 # 1363,1364,1585,3977,3978,4762,5752,5753,6901
 
-datatable(original_data[c(seq(3977-3,3977+4)),-11]) %>%
-  formatStyle(columns = "CO", 
-              target = "row",
-              background = styleInterval(cuts = 13, c("white","red"))) 
+original_data[c(seq(3977-3,3977+4)),-11] %>% 
+  kable(booktabs = T) %>%
+  kable_styling() %>%
+  row_spec(c(4,5), bold = T, background = "red")
 ```
+
 The observations that had high CO values but did not show any evidence of a shock to the process variables all indicated a different relationship. The figure above shows an example of two observations, again highlighted in red, which we found a possible explanation for their extreme CO values. It is obvious that the CO values belonging to the two observations in question are vastly different from their neighbor observations despite all the process variables being very similar. If you divide their CO values by 10 (move the decimal once to the left), the CO values of the two observations suddenly look right. We believe that the observations like these in the data could have been incorrectly entered. One explanation for this is if the data is manually entered, the employee entering the data could have accidentally made this error. We decided to change the observations which fit this explanation by dividing them by 10. There were 9 observations that were impacted by this. 
 
 
