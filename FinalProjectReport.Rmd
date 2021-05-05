@@ -3,23 +3,24 @@ title: |
   | \vspace{7cm} \LARGE{Gas Turbine CO Emission Analysis}
 author: "Aayushi Gupta, Kyle Kaminski, Rosa Lin, Ruben Martinez"
 date: "Client: Darren Glosemeyer"
-output: 
+output:
   pdf_document:
     extra_dependencies: ["float"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.pos = '!h')
 ```
 
 ```{r include = FALSE}
 # Load required packages
-library(readr) 
+library(readr)
 library(caret)
 library(tidyverse)
 library(tree)
 library(knitr)
 library(faraway)
+library(kableExtra)
 
 # Create RMSE function
 RMSE <- function(y, y_hat) {
@@ -34,34 +35,34 @@ RMSE <- function(y, y_hat) {
 
 \newpage
 
-# Introduction 
+# Introduction
 
 The combined cycle power plant, also known as combined cycle gas turbine plant, is an assembly of heat engines that combine to generate electricity (Tüfekci). A combined-cycle power plant (CCPP) is made up of gas turbines, steam turbines, and heat recovery steam generators. The electricity is generated and combined in one cycle by gas and steam turbines and then transferred from one turbine to another.  
 
-We are interested in identifying the process variables that impact carbon monoxide emissions. By determining the process variables that impact carbon monoxide emissions, we will be able to find opportunities to reduce carbon monoxide emissions. 
+We are interested in identifying the process variables that impact carbon monoxide emissions. By determining the process variables that impact carbon monoxide emissions, we will be able to find opportunities to reduce carbon monoxide emissions.
 
 Our plan is to analyze a dataset that contains 7384 instances of 11 sensor measures that have been aggregated over one hour (by means of average or sum) from a gas turbine located in Turkey for the purpose of studying flue gas emissions, namely CO and NOx (NO and NO2). The data comes from the same power plant as the dataset used for predicting hourly net energy yield. By contrast, this data is collected in another data range (01.01.2011 - 31.12.2015), includes gas turbine parameters (such as Turbine Inlet Temperature and Compressor Discharge pressure) in addition to the ambient variables. Note that the dates are not given in the instances but the data are sorted in chronological order. See the attribute information and [**relevant paper**](https://journals.tubitak.gov.tr/elektrik/issues/elk-19-27-6/elk-27-6-54-1807-87.pdf) for details. Kindly follow the protocol mentioned in the paper (using the first three years' data for training/ cross-validation and the last two for testing) for reproducibility and comparability of works. The dataset can be well used for predicting turbine energy yield (TEY) using ambient variables as features.
 
-## Goal 
+## Goal
 
-The goal for this project is to utilize this data set for the purpose of studying flue gas emissions, specifically carbon monoxide(CO) and nitrogen oxides (NOx). However, our client did tell us to not consider nitrogen oxide, so we will only be focusing on carbon monoxide in this report. Our focus will be to find statistically significant relationships between the ambient, turbine, and emissions variables. We will limit the size of our model to more clearly demonstrate these relationships. Ultimately, we will suggest which variables make the biggest impact on emission levels in order to decrease emissions overall. 
+The goal for this project is to utilize this data set for the purpose of studying flue gas emissions, specifically carbon monoxide(CO) and nitrogen oxides (NOx). However, our client did tell us to not consider nitrogen oxide, so we will only be focusing on carbon monoxide in this report. Our focus will be to find statistically significant relationships between the ambient, turbine, and emissions variables. We will limit the size of our model to more clearly demonstrate these relationships. Ultimately, we will suggest which variables make the biggest impact on emission levels in order to decrease emissions overall.
 
 ## Gas Turbine CO and NOx Emission Data Set
 
-The data comes from a gas turbine located in Turkey that studies the flue gas emissions of specifically carbon monoxide (CO) and nitrogen oxide (NOx) gases. The data set provides hourly statistics of 11 sensors. Data points were collected from a gas turbine from Jan 01 2011 to Dec 13 2015. 
+The data comes from a gas turbine located in Turkey that studies the flue gas emissions of specifically carbon monoxide (CO) and nitrogen oxide (NOx) gases. The data set provides hourly statistics of 11 sensors. Data points were collected from a gas turbine from Jan 01 2011 to Dec 13 2015.
 
-### Description 
+### Description
 
-The data file `gt_2015.csv` has 7384 observations and 11 variables from the [**UCI Gas Turbine CO and NOx Emission Data Set**](https://archive.ics.uci.edu/ml/datasets/Gas+Turbine+CO+and+NOx+Emission+Data+Set). We are going to explore and analyze the following variables (more details in Appendices 1): 
+The data file `gt_2015.csv` has 7384 observations and 11 variables from the [**UCI Gas Turbine CO and NOx Emission Data Set**](https://archive.ics.uci.edu/ml/datasets/Gas+Turbine+CO+and+NOx+Emission+Data+Set). We are going to explore and analyze the following variables (more details in Appendices 1):
 
 * AT - Ambient Temperature
 * AP - Ambient Pressure
 * AH -  Ambient Humidity
-* AFDP - Air filter difference pressure 
+* AFDP - Air filter difference pressure
 * GTEP - Gas turbine exhaust pressure
 * TIT - Turbine inlet temperature
-* TAT - Turbine after temperature 
-* TEY - Turbine energy yield 
+* TAT - Turbine after temperature
+* TEY - Turbine energy yield
 * CDP - Compressor discharge pressure
 * CO - Carbon Monoxide
 * NOX - Nitrogen Oxide (Removed from data)
@@ -99,7 +100,7 @@ test_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% setdiff(train_typica
 train_high <- gt_2015_high %>% dplyr::select(-NOX) %>% sample_frac(0.8)
 test_high <- gt_2015_high %>% dplyr::select(-NOX) %>% setdiff(train_high)
 
-# AIC stepwise selected linear models 
+# AIC stepwise selected linear models
 all_linear_mod <- train(
           form = CO ~ . - TIT - CDP - TEY ,
           data = train_all,
@@ -152,14 +153,14 @@ lasso_pred_typical <- predict(typical_lasso_mod, test_typical)
 lasso_pred_high <- predict(high_lasso_mod, test_high)
 
 # Decision Trees
-tree_CO_all <- tree(CO ~ . , train_all, 
-                  control = tree.control(nobs = length(train_all$CO), 
+tree_CO_all <- tree(CO ~ . , train_all,
+                  control = tree.control(nobs = length(train_all$CO),
                                          minsize = 4, mindev=0.001), method = "recursive.partition")
 tree_CO_typical <- tree(CO ~ . , train_typical,
-                        control = tree.control(nobs = length(train_typical$CO), 
+                        control = tree.control(nobs = length(train_typical$CO),
                                          minsize = 4, mindev=0.001), method = "recursive.partition")
 tree_CO_high <- tree(CO ~ . , train_high,
-                     control = tree.control(nobs = length(train_high$CO), 
+                     control = tree.control(nobs = length(train_high$CO),
                                          minsize = 4, mindev=0.001), method = "recursive.partition")
 pruned_tree_all <- prune.tree(tree_CO_all, best = 8)
 pruned_tree_typical <- prune.tree(tree_CO_typical, best = 7)
@@ -171,9 +172,9 @@ tree_pred_high <- predict(pruned_tree_high, test_high)
 
 
 
-## Exploratory Data Analysis 
+## Exploratory Data Analysis
 
-### Pairwise Correlations 
+### Pairwise Correlations
 
 &nbsp;
 &nbsp;
@@ -185,61 +186,92 @@ pairs(gt_2015, pch = 20, cex = 0.25, main = "Figure 1: Pairwise Correlation Plot
 &nbsp;
 &nbsp;
 
-```{r, message=FALSE, echo=FALSE, warning=FALSE}
-knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables")
+```{r, message=FALSE, echo=FALSE, warning=FALSE, results='asis'}
+knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables") %>%
+kable_styling(latex_options = c("hold_position"))
+
 ```
 
-The exploratory analysis shows possible linear relationships between the response variable CO and the feature variables CDP, TEY, TIT, GTEP and AFDP. The analysis also indicates possible collinearity between some of the feature variables (TIT, CDP, and TEY). This could cause some problems in our analysis and will likely lead to the removal of the redundant variables. 
+The exploratory analysis shows possible linear relationships between the response variable CO and the feature variables: CDP, TEY, TIT, GTEP and AFDP. The analysis indicates possible collinearity between some of the feature variables (TIT, CDP, and TEY). This could cause some problems in our analysis and will likely lead to the removal of the redundant variables.
 
 
-### Carbon Monoxide Distribution
+### Turbine Energy Yield Distribution
 
-The client provided us a set of production ranges to analyze. An overall production range that analyzes all of the data points from the carbon monoxide emission output, a typical production range which looks at data points from 130 to 136, and a high production range that looks at data points higher than 160. 
+The client provided us a set of turbine energy production ranges to analyze. An overall production range that analyzes all data, a typical production range which looks at data connected to energy yields from 130 to 136, and a high production range that looks at data connected to energy yields higher than 160.
 
 &nbsp;
 &nbsp;
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 d = density(gt_2015$TEY)
-plot(d, xlab = "Turbine Energy Yield", ylab = "Density", main = "Figure 2: Turbine Energy Yield Distribution")
+plot(d, xlab = "Turbine Energy Yield", ylab = "Density", main = "Figure 2: Turbine Energy Yield Distribution", cex.axis = .7)
+axis(1,at = c(127, 134.5), cex.axis = .7, lwd = (1), col.ticks = "red")
 polygon(d, col = "blue4", border = "chocolate1")
 abline(v = c(127,134.5,160), lty = c(1,1,2), col = c("red","red","black"))
+
+```  
+
+The typical production range the client provided did not fully capture the typical production range that we observed in our data sample (see Figure 2 above). This could be a result of the data values from the 2015 data set having lower values compared to other data sets. Therefore, we decided to shift the typical production range to 127 to 134.5 given that it is a better representation of the typical production range of the turbine energy yield.
+
+\newpage
+
+### Carbon Monoxide Extreme Values
+
+&nbsp;
+&nbsp;
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+original_data <- read_csv("Project Data/gt_2015.csv")
+
+plot(original_data$CO, xlab = "Index", ylab = "CO", main = "Figure 3: Extreme CO Values",
+     pch = 20, col = "blue")
+abline(h = 15, lty = 1, col = "red")
 ```
 
-The typical production range the client provided did not fully capture the typical production range that we observed in our data sample (see Figure 2 above). This could be a result of the data values from the 2015 data set having lower values compared to other data sets. Therefore, we decided to shift the typical production range to 127 to 134.5 given that it is a better representation of the typical production range of the carbon monoxide emission output. 
+We quickly encountered some issues with the data collected from the power plant. As you can see from Figure 3 above, there are several CO values which deviate significantly from the rest of the values. These outliers look to be somewhat random in Figure 3, but after some investigating we found that the observations with extreme CO values typically fell into one of two categories (see Appendix 8). After appropriately dealing with the observations that fell into each category, we found the CO values to be much more reasonable as is evident in Figure 4.
+
+&nbsp;
+&nbsp;
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+plot(gt_2015$CO, xlab = "Index", ylab = "CO", main = "Figure 4: CO Values",
+     pch = 20, col = "blue")
+```
 
 
-### Data Preparation 
+### Data Preparation
 
-The first step to preparing the data was to remove the response variable nitrogen oxide, since our analysis solely focuses on carbon monoxide emissions. 
+The first step to preparing the data was to remove the response variable nitrogen oxide, since our analysis solely focuses on carbon monoxide emissions.
 
-Since we were able to anticipate variables that could cause some problems in our linear based analyses due to collinearity, we decided to remove the following variables from our linear based models: 
+Since we were able to anticipate variables that could cause some problems in our linear based analyses due to multicollinearity, we decided to remove the following variables from our linear based models:
 
 * TIT
-* CDP 
-* TEY 
+* CDP
+* TEY
 
+## Model Selection
 
-## Model Selection 
-
-To accurately identify the process variables that impact carbon monoxide emissions, we decided to examine three different models to make sure that the model we selected was the most useful and effective way of analyzing the data set. The three models we used were **Multiple Linear Regression**, **Lasso**, and **Decision Trees**. 
+To accurately identify the process variables that impact carbon monoxide emissions, we decided to examine three different models to make sure that the model we selected was the most useful and effective way of analyzing the data set. The three models we used were **Multiple Linear Regression**, **Lasso**, and **Decision Trees**.
 
 ### RMSE
 
-In order to determine which model was the most effective, we compared the RMSE of multiple linear regression, lasso, and decision tree models. Root Mean Squared Errors are the standard deviation of residuals. The point of calculating the RMSE is to measure how spread out these variables are. The rule of thumb is, the lower the RMSE, the better. 
+In order to determine which model was the most effective, we compared the RMSE of multiple linear regression, lasso, and decision tree models. Root Mean Squared Errors are the standard deviation of residuals. We calculate the RMSE to measure how spread out these variables are. The rule of thumb is, the lower the RMSE, the better.
 
 ### Training and Testing Data
 
-For all of our models, we split our data into training and testing datasets to avoid overfitting the models. By doing so, we minimized the effects of data discrepancies and effectively evaluated our models. 
+For all of our models, we split our data into training and testing datasets to avoid overfitting the models. By doing so, we minimized the effects of data discrepancies and effectively evaluated our models.
 
+### K-Fold Cross-Validation
 
-\newpage 
+When evaluating our models we used 5-Fold Cross-Validation. This minimizes the effect that a single train-test split has on our model. Instead of being highly dependent on a single train-test split of our data we average the results of five different train-test splits when evaluating our model. This results in a better generalized model that does not overfit our data.
+
+\newpage
 
 # Results
 
-## Decision Tree Model Selection 
+## Decision Tree Model Selection
 
-In the table below, the decision tree outperforms linear regression and lasso in the overall production range, typical production range, and high production range. Therefore, we decided to use the Decision Tree Model to examine the biggest impact on emission levels in order to decrease emissions overall. 
+In the table below, the decision tree outperforms linear regression and lasso in the overall production range and typical production range. Even though the linear regression model performs better in the high production range, the decision tree model comes in as a close second. Therefore, we decided to use the Decision Tree Model to examine the biggest impact on emission levels in order to decrease emissions overall.
 
 ```{r,include = FALSE,  message=FALSE, echo=FALSE, warning=FALSE}
 all_linear_rmse     <- RMSE(test_all$CO, linear_pred_all)
@@ -264,12 +296,13 @@ RMSE_Table <- matrix(c(round(all_linear_rmse    ,digits = 4),
                        round(high_lass_rmse     ,digits = 4),
                        round(all_tree_rmse      ,digits = 4),
                        round(typical_tree_rmse  ,digits = 4),
-                       round(high_tree_rmse     ,digits = 4 )) 
+                       round(high_tree_rmse     ,digits = 4 ))
                      ,ncol=3, byrow=TRUE)
 colnames(RMSE_Table) <- c("Overall Production Range", "Typical Production Range (127-134.5)", "High Production Range (160+)")
 rownames(RMSE_Table) <- c("Linear Regression", "Lasso", "Decision Tree" )
 RMSE_Table <- as.table(RMSE_Table)
-RMSE_Table <- kable(RMSE_Table)
+RMSE_Table <- kable(RMSE_Table) %>%
+kable_styling(latex_options = c("scale_down"))
 RMSE_Table
 ```
 
@@ -281,10 +314,10 @@ RMSE_Table
 \caption{Overall Production Range Decision Tree}
 \end{figure}
 
-The decision tree above represents the final tree model that was trained on the entire data set supplied to us. The first split the tree made was on the turbine inlet temperatures, separating observations where the TIT was less than 1049.75 to the left and the remaining observations to the right. If we observe all of the terminal nodes on each side of the tree after this first split, it is clear that the higher TIT values resulted in lower CO values. Similar to the TIT values, it is also observed that **higher TAT, AT, and AFDP** values also resulted in lower CO output as well. 
+The decision tree above represents the final tree model that was trained on the entire data set supplied to us. The first split the tree made was on the turbine inlet temperatures, separating observations where the TIT was less than 1049.75 to the left and the remaining observations to the right. If we observe all of the terminal nodes on each side of the tree after this first split, it is clear that the higher TIT values resulted in lower CO values. Similar to the TIT values, it is also observed that **higher TAT, AT, and AFDP** values also resulted in lower CO output as well.
 
 
-## Typical Decision Tree Model 
+## Typical Decision Tree Model
 
 \begin{figure}[H]
 \centering
@@ -292,7 +325,7 @@ The decision tree above represents the final tree model that was trained on the 
 \caption{Typical Production Range Decision Tree}
 \end{figure}
 
-This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 134.5. This tree first split on AT, and actually terminates when the AT is greater than 11.9655. We can infer AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our overall tree model. We can conclude **Lower GTEP and higher AT** values look to result in lowering CO output.
+This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 134.5. This tree first split on AT, and actually terminates when the AT is greater than 11.9655. We can infer AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our overall tree model. We can conclude **lower GTEP and higher AT** values appear to result in lowering CO output.
 
 
 ## High Decision Tree Model
@@ -303,14 +336,14 @@ This decision tree represents our final tree model that was trained on the typic
 \caption{High Production Range Decision Tree}
 \end{figure}
 
-This decision tree represents our final tree model that was built on the high production range data with TEY values over 160. This tree argues that higher AFDP values on average result in lower CO output because the average value of the nodes on the right side is lower than those on the left. Unlike our previous models, AT does not show a very strong relationship with the CO output values. **Higher TEY and lower TAT** values look to have lower CO outputs. 
+This decision tree represents our final tree model that was built on the high production range data with TEY values over 160. This tree argues that higher AFDP values on average result in lower CO output because the average value of the nodes on the right side is lower than those on the left. Unlike our previous models, AT does not show a very strong relationship with the CO output values. **Higher TEY and lower TAT** values appear to have lower CO outputs.
 
 
 \newpage
 
-# Conclusion 
+# Conclusion
 
-## Most Sensitive Process Variables 
+## Most Sensitive Process Variables
 
 Based on our results, the following variables are the most sensitive process variables for the overall production range:
 
@@ -333,32 +366,55 @@ Based on our results, the following variables are the most sensitive process var
 * TAT
 * TEY
 
-As you can see...
 
-## Suggestions 
+## Process Variables Impact on CO
 
+1. Overall Production Range: Higher TAT, AT, and AFDP values will lower CO outputs.
 
+2. Typical Production Range (127-134.5): Higher AT and lower GTEP will lower CO outputs.
+
+3. High Production Range (160+): Higher TEY and lower TAT will lower CO outputs.
+
+## Recommendations
+
+1. Explore possible ways to increase AFDP.
+
+2. Ensure the typical production range that was supplied to us is the correct range.
+
+3. Client should make sure all data is entered correctly and note any events which require the turbines to shut down.
 
 \newpage
 
 # Appendix
 
-## 1. Multiple Linear Regression
 
-We will create a multiple linear regression model using the feature variables remaining after preparing our data -- AT, AP, AH, AFDP, GTEP, and TAT. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $\beta$ using:
+## 1. Extended description of variables
+
+The table below shows the full description of variables not included in our description.
+
+\begin{figure}[H]
+\centering
+\includegraphics{./images/Variable_description.png}
+\caption{Variable Description}
+\end{figure}
+
+
+## 2. Multiple Linear Regression
+
+We created a multiple linear regression model using the feature variables remaining after preparing our data -- AT, AP, AH, AFDP, GTEP, and TAT. The implementation and parameters of this model can be obtained by the following equation where we found estimates for the parameters $\beta$ using:
 
 $$\hat{\beta} = (X^TX)^{-1}X$$
 [[**Source**]](https://daviddalpiaz.github.io/appliedstats/simple-linear-regression.html)
 
-Key assumptions are stated as: 
+Key assumptions are stated as:
 
 * **L**inearity: can be written as a linear combination of the predictors.
 * **I**ndependence: the errors are independent of each other (not highly correlated).
 * **N**ormality: the distribution of the errors follow a normal distribution.
-* **E**qual Variance: the error variance is the same. 
+* **E**qual Variance: the error variance is the same.
 
 
-## 2. Lasso 
+## 3. Lasso
 
 The Lasso model is similar in structure to the linear model, but it differs in how the variable selection process is treated. Lasso models often perform better than a simple/multiple linear regression because the Lasso model can penalize unimportant variables by shrinking their corresponding coefficients, which decreases the influence those variables have on the model. This is preferable over the linear regression model because the variance can be decreased without largely impacting the model’s bias.
 
@@ -366,45 +422,55 @@ $$\sum_{i=1}^{n} \Big(y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{ij}\Big)^2 + \la
 
 [[**Source**]](https://statisticallearning.org/regularization.html)
 
-## 3. Decision Tree 
+## 4. Decision Tree
 
-Decision trees are nonparametric models and work by taking in all of the characteristics of the observations, and then splitting the data into separate groups based on the optimal splitting characteristics. These models are called decision tree models because each split can be thought of as a branch in a tree. The leaves are thus called terminal nodes in this model because that is where the model outputs the prediction based on all the splitting criteria up until that point. A decision tree can be used to predict both categorical outcomes and quantitative outcomes. In this analysis, we are looking for a numeric outcome so a regression tree is used. 
+Decision trees are nonparametric models and work by taking in all of the characteristics of the observations, and then splitting the data into separate groups based on the optimal splitting characteristics. These models are called decision tree models because each split can be thought of as a branch in a tree. The leaves are thus called terminal nodes in this model because that is where the model outputs the prediction based on all the splitting criteria up until that point. A decision tree can be used to predict both categorical outcomes and quantitative outcomes. In this analysis, we are looking for a numeric outcome so a regression tree is used.
 
 
 $$\textrm{Gini}(K) = \sum_{i \in N} P_{i,K}(1-P_{i,K}) = 1 - \sum_{i \in N} P^2_{i,K}$$
+[[**Source**]](https://medium.com/the-owl/k-fold-cross-validation-in-keras-3ec4a3a00538)
 
 
-[[**Source**]]()
+## 5. Model Training and Testing Procedure
+
+All of our models were built following the same procedure. We first split the provided data set into training and testing data sets, with 80% of the data randomly assigned to the training data and the remaining 20% assigned to the testing data. We built every comparable model on the same training data as well as tested every comparable model on the same testing data. We did this so we would not risk a model outperforming another from chance due to being applied to a different subset of the original data. All models were also trained using Cross Validation. Cross Validation lowers a models dependency on the data it is trained on by splitting the data into k different subsets (in our case, 5) and training the model k times, each time using k-1 subsets to train the model and the final subset to test the models performance. The k different models built are then averaged together to a single model which does not overfit our training data. The figure below visually illustrates the process that we followed.
+
+\begin{figure}[H]
+\centering
+\includegraphics{./images/CV_image.png}
+\caption{5-Fold Cross Validation}
+\end{figure}
+[[**Source**]](https://medium.com/the-owl/k-fold-cross-validation-in-keras-3ec4a3a00538)
 
 
-## 4. Variance Inflation Factor (VIF)
+## 6. Variance Inflation Factor (VIF)
 
-Variance Inflation Factor detects multicollinearity in regression analysis. Multicollinearity is when the correlation between predictors affects regression results. We only used VIF in our linear based models.
+Variance Inflation Factor detects multicollinearity in regression analysis. Multicollinearity is when two or more predictors are linearly associated. Linear associations between predictors can cause issues in linear regression results because we assume that independent variables are independent of one another. Linearly related predictors move very similarly, this means we can not really infer that an change in one predictor will impact the outcome by a certain amount because the correlated predictor will also move. Fortunately, we can figure out which predictors are most responsible for multicollinearity issues by checking their VIF values (high VIF values indicate issues with that predictor). We set the VIF cutoff at a value of 10, removing the highest VIF predictor variables one by one until all had VIF values less than 10. It is important to emphasize that only linearly based models are effected by multicollinearity, so we only removed predictor variables that caused issues in linear based models.
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 full_model_all     = lm(CO ~ . - NOX, data = gt_2015)
 full_model_typical = lm(CO ~ . - NOX, data = gt_2015_typical)
 full_model_high    = lm(CO ~ . - NOX, data = gt_2015_high)
 
-invisible(vif(full_model_all    ))
+invisible(vif(full_model_all))
 invisible(vif(full_model_typical))
-invisible(vif(full_model_high   ))
+invisible(vif(full_model_high))
 
 second_model_all     = lm(CO ~ . - NOX - TIT, data = gt_2015)
 second_model_typical = lm(CO ~ . - NOX - TIT, data = gt_2015_typical)
 second_model_high    = lm(CO ~ . - NOX - TEY, data = gt_2015_high)
 
-invisible(vif(second_model_all    ))
+invisible(vif(second_model_all))
 invisible(vif(second_model_typical))
-invisible(vif(second_model_high   ))
+invisible(vif(second_model_high))
 
 third_model_all     = lm(CO ~ . - NOX - TIT - CDP, data = gt_2015)
 third_model_typical = lm(CO ~ . - NOX - TIT - AT, data = gt_2015_typical)
 third_model_high    = lm(CO ~ . - NOX - TEY - CDP, data = gt_2015_high)
 
-invisible(vif(third_model_all    ))
+invisible(vif(third_model_all))
 invisible(vif(third_model_typical))
-invisible(vif(third_model_high   ))
+invisible(vif(third_model_high))
 
 initial_typical_linear_model <- third_model_typical
 initial_high_linear_model    <- third_model_high
@@ -416,13 +482,13 @@ invisible(vif(fourth_model_all))
 initial_all_linear_model <- fourth_model_all
 ```
 
-**VIF for overall production range** 
+**VIF for overall production range**
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 vif(initial_all_linear_model)
 ```
 
-**VIF for typical production range** 
+**VIF for typical production range**
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 vif(initial_typical_linear_model)
@@ -435,45 +501,65 @@ vif(initial_high_linear_model)
 ```
 
 
+We preprocessed our data by using Variance Inflation Factor (VIF) to tune our model and remove any redundant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model. Since we were able to anticipate variables that could cause some problems in our linear based analyses due to collinearity, we decided to remove the following variables from our linear based models for the overall production range: TIT, CDP, and TEY. For our typical production range we removed TIT and AT while for our high production range we removed TEY and CDP.
 
 
-## 5. Correlations
+## 7. Correlations
 
-Correlation is a statistical measure that measures which two variables are linearly related. It is commonly used to describe simple relationships without discussing the cause and effect.
+Correlation is a statistical measure that measures how strongly two variables are linearly related. It is commonly used to describe simple relationships without discussing the cause and effect.
 
 $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 
 [[**Source**]](https://www.geeksforgeeks.org/python-pearson-correlation-test-between-two-variables/)
 
 
-## 6. Ambient Temperature Plots
+## 8. Carbon Monoxide Extreme Values  
 
-```{r,  message=FALSE, echo=FALSE, warning=FALSE}
-model = lm(gt_2015$AT ~ gt_2015$TEY)
-ggplot(model, aes(x = gt_2015$TEY, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Total Energy Yield") + labs(y = "Ambient Temperature") + labs(title = "Figure 6: Relationship between Total Energy Yield & Ambient Temperature")
+&nbsp;
+&nbsp;
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+# 115,116,117,118,119,120,121,626,1009,1301,1709,1710,1711,1712,1713,1796
+
+original_data[c(seq(1009-4,1009+4)),-11] %>%
+  kable(booktabs = T) %>%
+  kable_styling() %>%
+  row_spec(5, bold = T, background = "red")
 ```
 
-```{r,  message=FALSE, echo=FALSE, warning=FALSE}
-model2 = lm(gt_2015$AT ~ gt_2015$CO)
-ggplot(model, aes(x = gt_2015$CO, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Carbon Monoxide") + labs(y = "Ambient Temperature") + labs(title = "Figure 7: Relationship between Carbon Monoxide & Ambient Temperature")
+The first relationship that we found between observations with extreme CO values was a shock to their TIT, TAT, and TEY values. In the figure above, the row with an extreme CO value is highlighted in red. Comparing that observation with the neighbor observations above and below, it can be seen that the observation had a drop in TIT, TAT, and TEY values while all other values (except for CO) stayed relatively constant. We believe that this was due to some sort of malfunction or temporary shutdown of the turbines, which would explain why the turbine related temperatures and the energy yield dropped significantly for a short time period. The high CO could be explained by the turbine starting back up after the shut down, which would likely require significantly more energy than a running machine and produce high amounts of CO. These observations are not relevant to analyzing which process variables are directly related to CO output as their CO values are likely heavily influenced by some outside factor not accounted for in our data. Therefore, we chose to remove the observations which fit this explanation. 16 observations were removed.  
+ 
+ 
+&nbsp;
+&nbsp;
+
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+# 1363,1364,1585,3977,3978,4762,5752,5753,6901
+
+original_data[c(seq(3977-3,3977+4)),-11] %>%
+  kable(booktabs = T) %>%
+  kable_styling() %>%
+  row_spec(c(4,5), bold = T, background = "red")
 ```
 
-Figures 6 and 7 above help further explain the why higher AT result in lower CO outputs. Figure 6 shows no clear trend with TEY values less than around 145, but a clear negative trend when the TEY values are above 145. This shows the extreme TEY values are impacted by AT, likely because at very high temperatures the machines can not work as hard or they will overheat. Figure 7 on the bottom shows AT against CO, where we see 9 CO values greater than 17 whereas the other 7300 observations are less. 
+The observations that had high CO values but did not show any evidence of a shock to the process variables all indicated a different relationship. The figure above shows an example of two observations, again highlighted in red, which we found a possible explanation for their extreme CO values. It is obvious that the CO values belonging to the two observations in question are vastly different from their neighbor observations despite all the process variables being very similar. If you divide their CO values by 10 (move the decimal once to the left), the CO values of the two observations look more in line with their neighboring values. We believe that the observations like these in the data could have been incorrectly entered. One explanation for this is if the data is manually entered, the employee entering the data could have accidentally made this error. We decided to change the observations which fit this explanation by dividing them by 10. There were 9 observations that were impacted by this.
 
-## Individual Contributions
+
+## 9. Individual Contributions
 
 **Aayushi**
 
-* 
+*
 
 **Kyle**
 
-* 
+*
 
 
 **Rosa**
 
-* 
+*
 
 **Ruben**
 
