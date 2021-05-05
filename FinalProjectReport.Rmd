@@ -448,10 +448,16 @@ $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 
 ## 6. Ambient Temperature Plots
 
+&nbsp;
+&nbsp;
+
 ```{r,  message=FALSE, echo=FALSE, warning=FALSE, fig.width=10,fig.height=5}
 model = lm(gt_2015$AT ~ gt_2015$TEY)
 ggplot(model, aes(x = gt_2015$TEY, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Total Energy Yield") + labs(y = "Ambient Temperature") + labs(title = "Figure 6: Relationship between Total Energy Yield & Ambient Temperature")
 ```
+
+&nbsp;
+&nbsp;
 
 ```{r,  message=FALSE, echo=FALSE, warning=FALSE, fig.width=10,fig.height=5}
 model2 = lm(gt_2015$AT ~ gt_2015$CO)
