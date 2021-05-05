@@ -66,8 +66,6 @@ The data file `gt_2015.csv` has 7384 observations and 11 variables from the [**U
 * CO - Carbon Monoxide
 * NOX - Nitrogen Oxide (Removed from data)
 
-\newpage
-
 Here’s a quick peek at the data set:
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
@@ -189,7 +187,7 @@ pairs(gt_2015, pch = 20, cex = 0.25, main = "Figure 1: Pairwise Correlation Plot
 knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables")
 ```
 
-The exploratory analysis shows possible linear relationships between the response variable CO and the feature variables CDP, TEY, TIT, GTEP and AFDP. The analysis also indicates possible collinearity between some of the feature variables (TIT, CDP, and TEY). This could cause some problems in our analysis and will likely lead to the removal of the redundant variables. 
+The exploratory analysis shows possible linear relationships between the response variable CO and the feature variables: CDP, TEY, TIT, GTEP and AFDP. The analysis indicates possible collinearity between some of the feature variables (TIT, CDP, and TEY). This could cause some problems in our analysis and will likely lead to the removal of the redundant variables. 
 
 
 ### Carbon Monoxide Distribution
@@ -333,15 +331,31 @@ Based on our results, the following variables are the most sensitive process var
 * TAT
 * TEY
 
-As you can see...
+## Recommendations
 
-## Suggestions 
+1. Overall Production Range: Higher TAT, AT, and AFDP values will lower CO outputs. 
 
+2. Typical Production Range (127-134.5): Higher AT and lower GTEP will lower CO outputs. 
 
+3. High Production Range (160+): Higher TEY and lower TAT will lower CO outputs. 
+
+##Suggestions 
+
+1. We recommend the client to modify AFDP. 
+
+2. In the future, it would be great if the client could expand their typical production range since the original typical production range did not accurately capture the range. 
+
+3. Client should check with the scientists beforehand to check if any outliers are entered correctly. 
 
 \newpage
 
 # Appendix
+
+
+Extending description of variables 
+
+[insert image]
+
 
 ## 1. Multiple Linear Regression
 
@@ -386,25 +400,25 @@ full_model_all     = lm(CO ~ . - NOX, data = gt_2015)
 full_model_typical = lm(CO ~ . - NOX, data = gt_2015_typical)
 full_model_high    = lm(CO ~ . - NOX, data = gt_2015_high)
 
-invisible(vif(full_model_all    ))
+invisible(vif(full_model_all))
 invisible(vif(full_model_typical))
-invisible(vif(full_model_high   ))
+invisible(vif(full_model_high))
 
 second_model_all     = lm(CO ~ . - NOX - TIT, data = gt_2015)
 second_model_typical = lm(CO ~ . - NOX - TIT, data = gt_2015_typical)
 second_model_high    = lm(CO ~ . - NOX - TEY, data = gt_2015_high)
 
-invisible(vif(second_model_all    ))
+invisible(vif(second_model_all))
 invisible(vif(second_model_typical))
-invisible(vif(second_model_high   ))
+invisible(vif(second_model_high))
 
 third_model_all     = lm(CO ~ . - NOX - TIT - CDP, data = gt_2015)
 third_model_typical = lm(CO ~ . - NOX - TIT - AT, data = gt_2015_typical)
 third_model_high    = lm(CO ~ . - NOX - TEY - CDP, data = gt_2015_high)
 
-invisible(vif(third_model_all    ))
+invisible(vif(third_model_all))
 invisible(vif(third_model_typical))
-invisible(vif(third_model_high   ))
+invisible(vif(third_model_high))
 
 initial_typical_linear_model <- third_model_typical
 initial_high_linear_model    <- third_model_high
@@ -435,6 +449,7 @@ vif(initial_high_linear_model)
 ```
 
 
+We preprocessed our data by using Variance Inflation Factor (VIF) to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model. Since we were able to anticipate variables that could cause some problems in our linear based analyses due to collinearity, we decided to remove the following variables from our linear based models for the overall production range: TIT, CDP, and TEY. For our typical production range we removed TIT and AT while for our high production range we removed TEY and CDP. 
 
 
 ## 5. Correlations
@@ -446,7 +461,16 @@ $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 [[**Source**]](https://www.geeksforgeeks.org/python-pearson-correlation-test-between-two-variables/)
 
 
-## 6. Ambient Temperature Plots
+## 6. K-Fold Cross Validation
+
+When evaluating our models we used 5-Fold Cross Validation. This minimizes the effect that a single train-test split has on our model. Instead of being highly dependent on a single train-test split of our data we average the results of five different train-test splits when evaluating or model. This results in a better generalized model that is not overfit on our data. 
+
+[insert image]
+
+[[**Source**]]()
+
+
+## 7. Ambient Temperature Plots
 
 ```{r,  message=FALSE, echo=FALSE, warning=FALSE}
 model = lm(gt_2015$AT ~ gt_2015$TEY)
