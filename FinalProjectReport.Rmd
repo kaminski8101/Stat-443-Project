@@ -9,7 +9,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.pos = '!h')
 ```
 
 ```{r include = FALSE}
@@ -66,6 +66,8 @@ The data file `gt_2015.csv` has 7384 observations and 11 variables from the [**U
 * CDP - Compressor discharge pressure
 * CO - Carbon Monoxide
 * NOX - Nitrogen Oxide (Removed from data)
+
+\newpage
 
 Here’s a quick peek at the data set:
 
@@ -184,8 +186,10 @@ pairs(gt_2015, pch = 20, cex = 0.25, main = "Figure 1: Pairwise Correlation Plot
 &nbsp;
 &nbsp;
 
-```{r, message=FALSE, echo=FALSE, warning=FALSE}
-knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables")
+```{r, message=FALSE, echo=FALSE, warning=FALSE, results='asis'}
+knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables") %>%
+kable_styling(latex_options = c("hold_position"))
+
 ```
 
 The exploratory analysis shows possible linear relationships between the response variable CO and the feature variables: CDP, TEY, TIT, GTEP and AFDP. The analysis indicates possible collinearity between some of the feature variables (TIT, CDP, and TEY). This could cause some problems in our analysis and will likely lead to the removal of the redundant variables. 
@@ -207,6 +211,7 @@ abline(v = c(127,134.5,160), lty = c(1,1,2), col = c("red","red","black"))
 
 The typical production range the client provided did not fully capture the typical production range that we observed in our data sample (see Figure 2 above). This could be a result of the data values from the 2015 data set having lower values compared to other data sets. Therefore, we decided to shift the typical production range to 127 to 134.5 given that it is a better representation of the typical production range of the carbon monoxide emission output. 
 
+\newpage
 
 ### Carbon Monoxide Extreme Values
 
@@ -241,8 +246,6 @@ Since we were able to anticipate variables that could cause some problems in our
 * TIT
 * CDP 
 * TEY 
-
-\newpage
 
 ## Model Selection 
 
@@ -293,7 +296,8 @@ RMSE_Table <- matrix(c(round(all_linear_rmse    ,digits = 4),
 colnames(RMSE_Table) <- c("Overall Production Range", "Typical Production Range (127-134.5)", "High Production Range (160+)")
 rownames(RMSE_Table) <- c("Linear Regression", "Lasso", "Decision Tree" )
 RMSE_Table <- as.table(RMSE_Table)
-RMSE_Table <- kable(RMSE_Table)
+RMSE_Table <- kable(RMSE_Table) %>%
+kable_styling(latex_options = c("scale_down"))
 RMSE_Table
 ```
 
@@ -316,7 +320,7 @@ The decision tree above represents the final tree model that was trained on the 
 \caption{Typical Production Range Decision Tree}
 \end{figure}
 
-This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 134.5. This tree first split on AT, and actually terminates when the AT is greater than 11.9655. We can infer AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our overall tree model. We can conclude **Lower GTEP and higher AT** values look to result in lowering CO output.
+This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 134.5. This tree first split on AT, and actually terminates when the AT is greater than 11.9655. We can infer AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our overall tree model. We can conclude **lower GTEP and higher AT** values look to result in lowering CO output.
 
 
 ## High Decision Tree Model
