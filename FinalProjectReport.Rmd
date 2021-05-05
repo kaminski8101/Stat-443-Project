@@ -182,6 +182,9 @@ tree_pred_high <- predict(pruned_tree_high, test_high)
 pairs(gt_2015, pch = 20, cex = 0.25, main = "Figure 1: Pairwise Correlation Plot")
 ```
 
+&nbsp;
+&nbsp;
+
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables")
 ```
@@ -285,7 +288,7 @@ The decision tree above represents the final tree model that was trained on the 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.6\textwidth]{./images/typical_tree.png}
+\includegraphics{./images/typical_tree.png}
 \caption{Typical Production Range Decision Tree}
 \end{figure}
 
@@ -296,7 +299,7 @@ This decision tree represents our final tree model that was trained on the typic
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.75\textwidth]{./images/high_tree.png}
+\includegraphics{./images/high_tree.png}
 \caption{High Production Range Decision Tree}
 \end{figure}
 
@@ -457,12 +460,21 @@ ggplot(model, aes(x = gt_2015$CO, y = gt_2015$AT), xlim = c(100,180)) + geom_jit
 
 Figures 6 and 7 above help further explain the why higher AT result in lower CO outputs. Figure 6 shows no clear trend with TEY values less than around 145, but a clear negative trend when the TEY values are above 145. This shows the extreme TEY values are impacted by AT, likely because at very high temperatures the machines can not work as hard or they will overheat. Figure 7 on the bottom shows AT against CO, where we see 9 CO values greater than 17 whereas the other 7300 observations are less. 
 
-## Individual Contributions:
+## Individual Contributions
 
-Aayushi:
+**Aayushi**
 
-Kyle:
+* 
 
-Rosa:
+**Kyle**
 
-Ruben
+* 
+
+
+**Rosa**
+
+* 
+
+**Ruben**
+
+*
