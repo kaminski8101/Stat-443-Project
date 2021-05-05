@@ -182,6 +182,9 @@ tree_pred_high <- predict(pruned_tree_high, test_high)
 pairs(gt_2015, pch = 20, cex = 0.25, main = "Figure 1: Pairwise Correlation Plot")
 ```
 
+&nbsp;
+&nbsp;
+
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables")
 ```
@@ -285,7 +288,7 @@ The decision tree above represents the final tree model that was trained on the 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.6\textwidth]{./images/typical_tree.png}
+\includegraphics{./images/typical_tree.png}
 \caption{Typical Production Range Decision Tree}
 \end{figure}
 
@@ -296,7 +299,7 @@ This decision tree represents our final tree model that was trained on the typic
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.75\textwidth]{./images/high_tree.png}
+\includegraphics{./images/high_tree.png}
 \caption{High Production Range Decision Tree}
 \end{figure}
 
@@ -306,18 +309,22 @@ This decision tree represents our final tree model that was built on the high pr
 
 ### Carbon Monoxide Correlations
 
-**----- ADD TABLE 6 HERE -----**
+**INSERT TABLE**
 
 The table above shows us the single correlations between CO and the explanatory variables that were used in the tree model splits. We found it surprising that high TIT, TAT, and AT resulted in lower CO outputs as we would think that cooler temperatures would result in more efficient energy production. The correlation table does show us that TIT and AT both have negative correlations with CO, meaning as one increases the other decreases. This supports the arguments made in our tree models. TAT has an almost 0 correlation with CO according to the data, which does not agree or disagree with our models since the TAT splits were always after other splits.
 
 ### Ambient Temperature Plots
 
-```{r,  message=FALSE, echo=FALSE, warning=FALSE}
+&nbsp;
+&nbsp;
+
+```{r,  message=FALSE, echo=FALSE, warning=FALSE, fig.width=10,fig.height=5}
 model = lm(gt_2015$AT ~ gt_2015$TEY)
 ggplot(model, aes(x = gt_2015$TEY, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Total Energy Yield") + labs(y = "Ambient Temperature") + labs(title = "Figure 6: Relationship between Total Energy Yield and Ambient Temperature")
 ```
 
-```{r,  message=FALSE, echo=FALSE, warning=FALSE}
+
+```{r,  message=FALSE, echo=FALSE, warning=FALSE, fig.width=10,fig.height=5}
 model2 = lm(gt_2015$AT ~ gt_2015$CO)
 ggplot(model, aes(x = gt_2015$CO, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Carbon Monoxide") + labs(y = "Ambient Temperature") + labs(title = "Figure 7: Relationship between Carbon Monoxide and Ambient Temperature")
 ```
@@ -461,12 +468,20 @@ $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 [[**Source**]](https://www.geeksforgeeks.org/python-pearson-correlation-test-between-two-variables/)
 
 
-Individual Contributions:
+## Individual Contributions
 
-Aayushi:
+**Aayushi**
 
-Kyle:
+* 
 
-Rosa:
+**Kyle**
 
-Ruben
+* 
+
+**Rosa**
+
+* 
+
+**Ruben**
+
+*
