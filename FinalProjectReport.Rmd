@@ -219,6 +219,7 @@ Since we were able to anticipate variables that could cause some problems in our
 * CDP 
 * TEY 
 
+\newpage
 
 ## Model Selection 
 
@@ -239,7 +240,7 @@ For all of our models, we split our data into training and testing datasets to a
 
 ## Decision Tree Model Selection 
 
-In the table below, the decision tree outperforms linear regression and lasso in the overall production range, typical production range, and high production range. Therefore, we decided to use the Decision Tree Model to examine the biggest impact on emission levels in order to decrease emissions overall. 
+In the table below, the decision tree outperforms linear regression and lasso in the overall production range and typical production range. Even though the linear regression model performs better in the high production range, the decision tree model comes in as a close second. Therefore, we decided to use the Decision Tree Model to examine the biggest impact on emission levels in order to decrease emissions overall. 
 
 ```{r,include = FALSE,  message=FALSE, echo=FALSE, warning=FALSE}
 all_linear_rmse     <- RMSE(test_all$CO, linear_pred_all)
@@ -333,7 +334,6 @@ Based on our results, the following variables are the most sensitive process var
 * TAT
 * TEY
 
-As you can see...
 
 ## Suggestions 
 
@@ -448,12 +448,12 @@ $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 
 ## 6. Ambient Temperature Plots
 
-```{r,  message=FALSE, echo=FALSE, warning=FALSE}
+```{r,  message=FALSE, echo=FALSE, warning=FALSE, fig.width=10,fig.height=5}
 model = lm(gt_2015$AT ~ gt_2015$TEY)
 ggplot(model, aes(x = gt_2015$TEY, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Total Energy Yield") + labs(y = "Ambient Temperature") + labs(title = "Figure 6: Relationship between Total Energy Yield & Ambient Temperature")
 ```
 
-```{r,  message=FALSE, echo=FALSE, warning=FALSE}
+```{r,  message=FALSE, echo=FALSE, warning=FALSE, fig.width=10,fig.height=5}
 model2 = lm(gt_2015$AT ~ gt_2015$CO)
 ggplot(model, aes(x = gt_2015$CO, y = gt_2015$AT), xlim = c(100,180)) + geom_jitter(width = 3, color = "navy") + theme_classic() + labs(x = "Carbon Monoxide") + labs(y = "Ambient Temperature") + labs(title = "Figure 7: Relationship between Carbon Monoxide & Ambient Temperature")
 ```
