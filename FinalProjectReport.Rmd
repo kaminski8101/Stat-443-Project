@@ -195,9 +195,9 @@ kable_styling(latex_options = c("hold_position"))
 The exploratory analysis shows possible linear relationships between the response variable CO and the feature variables: CDP, TEY, TIT, GTEP and AFDP. The analysis indicates possible collinearity between some of the feature variables (TIT, CDP, and TEY). This could cause some problems in our analysis and will likely lead to the removal of the redundant variables. 
 
 
-### Carbon Monoxide Distribution
+### Turbine Energy Yield Distribution
 
-The client provided us a set of production ranges to analyze. An overall production range that analyzes all of the data points from the carbon monoxide emission output, a typical production range which looks at data points from 130 to 136, and a high production range that looks at data points higher than 160. 
+The client provided us a set of turbine energy production ranges to analyze. An overall production range that analyzes all data, a typical production range which looks at data connected to energy yields from 130 to 136, and a high production range that looks at data connected to energy yields higher than 160. 
 
 &nbsp;
 &nbsp;
@@ -207,9 +207,9 @@ d = density(gt_2015$TEY)
 plot(d, xlab = "Turbine Energy Yield", ylab = "Density", main = "Figure 2: Turbine Energy Yield Distribution")
 polygon(d, col = "blue4", border = "chocolate1")
 abline(v = c(127,134.5,160), lty = c(1,1,2), col = c("red","red","black"))
-```
+```   
 
-The typical production range the client provided did not fully capture the typical production range that we observed in our data sample (see Figure 2 above). This could be a result of the data values from the 2015 data set having lower values compared to other data sets. Therefore, we decided to shift the typical production range to 127 to 134.5 given that it is a better representation of the typical production range of the carbon monoxide emission output. 
+The typical production range the client provided did not fully capture the typical production range that we observed in our data sample (see Figure 2 above). This could be a result of the data values from the 2015 data set having lower values compared to other data sets. Therefore, we decided to shift the typical production range to 127 to 134.5 given that it is a better representation of the typical production range of the turbine energy yield. 
 
 \newpage
 
@@ -253,7 +253,7 @@ To accurately identify the process variables that impact carbon monoxide emissio
 
 ### RMSE
 
-In order to determine which model was the most effective, we compared the RMSE of multiple linear regression, lasso, and decision tree models. Root Mean Squared Errors are the standard deviation of residuals. The point of calculating the RMSE is to measure how spread out these variables are. The rule of thumb is, the lower the RMSE, the better. 
+In order to determine which model was the most effective, we compared the RMSE of multiple linear regression, lasso, and decision tree models. Root Mean Squared Errors are the standard deviation of residuals. We calculate the RMSE to measure how spread out these variables are. The rule of thumb is, the lower the RMSE, the better. 
 
 ### Training and Testing Data
 
@@ -261,7 +261,7 @@ For all of our models, we split our data into training and testing datasets to a
 
 ### K-Fold Cross-Validation
 
-When evaluating our models we used 5-Fold Cross-Validation. This minimizes the effect that a single train-test split has on our model. Instead of being highly dependent on a single train-test split of our data we average the results of five different train-test splits when evaluating or model. This results in a better generalized model that is not overfitted on our data. 
+When evaluating our models we used 5-Fold Cross-Validation. This minimizes the effect that a single train-test split has on our model. Instead of being highly dependent on a single train-test split of our data we average the results of five different train-test splits when evaluating our model. This results in a better generalized model that is not overfitted on our data. 
 
 \newpage 
 
