@@ -261,7 +261,7 @@ For all of our models, we split our data into training and testing datasets to a
 
 ### K-Fold Cross-Validation
 
-When evaluating our models we used 5-Fold Cross-Validation. This minimizes the effect that a single train-test split has on our model. Instead of being highly dependent on a single train-test split of our data we average the results of five different train-test splits when evaluating our model. This results in a better generalized model that is not overfitted on our data. 
+When evaluating our models we used 5-Fold Cross-Validation. This minimizes the effect that a single train-test split has on our model. Instead of being highly dependent on a single train-test split of our data we average the results of five different train-test splits when evaluating our model. This results in a better generalized model that does not overfit our data. 
 
 \newpage 
 
@@ -323,7 +323,7 @@ The decision tree above represents the final tree model that was trained on the 
 \caption{Typical Production Range Decision Tree}
 \end{figure}
 
-This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 134.5. This tree first split on AT, and actually terminates when the AT is greater than 11.9655. We can infer AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our overall tree model. We can conclude **lower GTEP and higher AT** values look to result in lowering CO output.
+This decision tree represents our final tree model that was trained on the typical energy production range with TEY values between 127 and 134.5. This tree first split on AT, and actually terminates when the AT is greater than 11.9655. We can infer AT is likely the most important variable in this energy production range with the higher AT values resulting in lower CO, agreeing with our overall tree model. We can conclude **lower GTEP and higher AT** values appear to result in lowering CO output.
 
 
 ## High Decision Tree Model
@@ -334,7 +334,7 @@ This decision tree represents our final tree model that was trained on the typic
 \caption{High Production Range Decision Tree}
 \end{figure}
 
-This decision tree represents our final tree model that was built on the high production range data with TEY values over 160. This tree argues that higher AFDP values on average result in lower CO output because the average value of the nodes on the right side is lower than those on the left. Unlike our previous models, AT does not show a very strong relationship with the CO output values. **Higher TEY and lower TAT** values look to have lower CO outputs. 
+This decision tree represents our final tree model that was built on the high production range data with TEY values over 160. This tree argues that higher AFDP values on average result in lower CO output because the average value of the nodes on the right side is lower than those on the left. Unlike our previous models, AT does not show a very strong relationship with the CO output values. **Higher TEY and lower TAT** values appear to have lower CO outputs. 
 
 
 \newpage
@@ -399,7 +399,7 @@ The table below shows the full description of variables not included in our desc
 
 ## 2. Multiple Linear Regression
 
-We will create a multiple linear regression model using the feature variables remaining after preparing our data -- AT, AP, AH, AFDP, GTEP, and TAT. The implementation and parameters of this model can be obtained by the following equation where we will find estimates for the parameters $\beta$ using:
+We created a multiple linear regression model using the feature variables remaining after preparing our data -- AT, AP, AH, AFDP, GTEP, and TAT. The implementation and parameters of this model can be obtained by the following equation where we found estimates for the parameters $\beta$ using:
 
 $$\hat{\beta} = (X^TX)^{-1}X$$
 [[**Source**]](https://daviddalpiaz.github.io/appliedstats/simple-linear-regression.html)
@@ -431,7 +431,7 @@ $$\textrm{Gini}(K) = \sum_{i \in N} P_{i,K}(1-P_{i,K}) = 1 - \sum_{i \in N} P^2_
 
 ## 5. Model Training and Testing Procedure
 
-All of our models were built following the same procedure. We first split the provided data set into training and testing data sets, with 80% of the data randomly assigned to the training data and the remaining 20% assigned to the testing data. We built every comparable model on the same training data as well as tested every comparable model on the same testing data. We did this so we would not risk a model outperforming another from chance due to being applied to a different subset of the original data. All models were also trained using Cross Validation. Cross Validation lowers a models dependency on the data it is trained on by splitting the data into k different subsets (in our case, 5) and training the model k times, each time using k-1 subsets to train the model and the final subset to test the models performance. The k different models built are then averaged together to a single model which is not over fit to the training data. The figure below visually illustrates the process that we followed.
+All of our models were built following the same procedure. We first split the provided data set into training and testing data sets, with 80% of the data randomly assigned to the training data and the remaining 20% assigned to the testing data. We built every comparable model on the same training data as well as tested every comparable model on the same testing data. We did this so we would not risk a model outperforming another from chance due to being applied to a different subset of the original data. All models were also trained using Cross Validation. Cross Validation lowers a models dependency on the data it is trained on by splitting the data into k different subsets (in our case, 5) and training the model k times, each time using k-1 subsets to train the model and the final subset to test the models performance. The k different models built are then averaged together to a single model which does not overfit our training data. The figure below visually illustrates the process that we followed.
 
 \begin{figure}[H]
 \centering
@@ -443,7 +443,7 @@ All of our models were built following the same procedure. We first split the pr
 
 ## 6. Variance Inflation Factor (VIF)
 
-Variance Inflation Factor detects multicollinearity in regression analysis. Multicollinearity is when two or more predictors are linearly associated. Linear associations between predictors can cause issues in linear regression results because we assume that independent variables are independent of one another. Linearly related predictors move very similarly, this means we can not really infer that an change in one predictor will impact the outcome by a certain amount because the correlated predictor will also move! Fortunately, we can figure out which predictors are most responsible for multicollinearity issues by checking their VIF values (high VIF values indicate issues with that predictor). We set the VIF cutoff at a value of 10, removing the highest VIF predictor variables one by one until all had VIF values less than 10. It is important to emphasize that only linearly based models are effected by multicollinearity, so we only removed predictor variables that caused issues in linear based models.
+Variance Inflation Factor detects multicollinearity in regression analysis. Multicollinearity is when two or more predictors are linearly associated. Linear associations between predictors can cause issues in linear regression results because we assume that independent variables are independent of one another. Linearly related predictors move very similarly, this means we can not really infer that an change in one predictor will impact the outcome by a certain amount because the correlated predictor will also move. Fortunately, we can figure out which predictors are most responsible for multicollinearity issues by checking their VIF values (high VIF values indicate issues with that predictor). We set the VIF cutoff at a value of 10, removing the highest VIF predictor variables one by one until all had VIF values less than 10. It is important to emphasize that only linearly based models are effected by multicollinearity, so we only removed predictor variables that caused issues in linear based models.
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 full_model_all     = lm(CO ~ . - NOX, data = gt_2015)
@@ -499,12 +499,12 @@ vif(initial_high_linear_model)
 ```
 
 
-We preprocessed our data by using Variance Inflation Factor (VIF) to tune our model and remove any insignificant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model. Since we were able to anticipate variables that could cause some problems in our linear based analyses due to collinearity, we decided to remove the following variables from our linear based models for the overall production range: TIT, CDP, and TEY. For our typical production range we removed TIT and AT while for our high production range we removed TEY and CDP. 
+We preprocessed our data by using Variance Inflation Factor (VIF) to tune our model and remove any redundant predictor variables. This selection prefers smaller models which aligns with our goal of limiting the size of our final model. Since we were able to anticipate variables that could cause some problems in our linear based analyses due to collinearity, we decided to remove the following variables from our linear based models for the overall production range: TIT, CDP, and TEY. For our typical production range we removed TIT and AT while for our high production range we removed TEY and CDP. 
 
 
 ## 7. Correlations
 
-Correlation is a statistical measure that measures which two variables are linearly related. It is commonly used to describe simple relationships without discussing the cause and effect.
+Correlation is a statistical measure that measures how strongly two variables are linearly related. It is commonly used to describe simple relationships without discussing the cause and effect.
 
 $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 
@@ -525,7 +525,7 @@ original_data[c(seq(1009-4,1009+4)),-11] %>%
   row_spec(5, bold = T, background = "red")
 ```
 
-The first relationship that we found between observations with extreme CO values was a shock to their TIT, TAT, and TEY values. In the figure above, the row with an extreme CO value is highlighted in red. Comparing that observation with the neighbor observations above and below, it can be seen that the observation had a drop in TIT, TAT, and TEY values while all other values (except for CO of course) stayed relatively constant. We believe that this was due to some sort of malfunction or temporary shutdown of the turbines, which would explain why the turbine related temperatures and the energy yield dropped significantly for a short time period. The high CO could be explained by the turbine starting back up after the shut down, which would likely require significantly more energy than a running machine and produce high amounts of CO. These observations are not relevant to analyzing which process variables are directly related to CO output as their CO values are likely heavily influenced by some outside factor not accounted for in our data. Therefore, we chose to remove the observations which fit this explanation. 16 observations were removed.  
+The first relationship that we found between observations with extreme CO values was a shock to their TIT, TAT, and TEY values. In the figure above, the row with an extreme CO value is highlighted in red. Comparing that observation with the neighbor observations above and below, it can be seen that the observation had a drop in TIT, TAT, and TEY values while all other values (except for CO) stayed relatively constant. We believe that this was due to some sort of malfunction or temporary shutdown of the turbines, which would explain why the turbine related temperatures and the energy yield dropped significantly for a short time period. The high CO could be explained by the turbine starting back up after the shut down, which would likely require significantly more energy than a running machine and produce high amounts of CO. These observations are not relevant to analyzing which process variables are directly related to CO output as their CO values are likely heavily influenced by some outside factor not accounted for in our data. Therefore, we chose to remove the observations which fit this explanation. 16 observations were removed.  
  
  
 &nbsp;
@@ -541,7 +541,7 @@ original_data[c(seq(3977-3,3977+4)),-11] %>%
   row_spec(c(4,5), bold = T, background = "red")
 ```
 
-The observations that had high CO values but did not show any evidence of a shock to the process variables all indicated a different relationship. The figure above shows an example of two observations, again highlighted in red, which we found a possible explanation for their extreme CO values. It is obvious that the CO values belonging to the two observations in question are vastly different from their neighbor observations despite all the process variables being very similar. If you divide their CO values by 10 (move the decimal once to the left), the CO values of the two observations suddenly look right. We believe that the observations like these in the data could have been incorrectly entered. One explanation for this is if the data is manually entered, the employee entering the data could have accidentally made this error. We decided to change the observations which fit this explanation by dividing them by 10. There were 9 observations that were impacted by this. 
+The observations that had high CO values but did not show any evidence of a shock to the process variables all indicated a different relationship. The figure above shows an example of two observations, again highlighted in red, which we found a possible explanation for their extreme CO values. It is obvious that the CO values belonging to the two observations in question are vastly different from their neighbor observations despite all the process variables being very similar. If you divide their CO values by 10 (move the decimal once to the left), the CO values of the two observations look more in line with their neighboring values. We believe that the observations like these in the data could have been incorrectly entered. One explanation for this is if the data is manually entered, the employee entering the data could have accidentally made this error. We decided to change the observations which fit this explanation by dividing them by 10. There were 9 observations that were impacted by this. 
 
 
 ## 9. Individual Contributions
