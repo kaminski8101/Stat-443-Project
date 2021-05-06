@@ -1,7 +1,9 @@
 ---
 title: |
-  | \vspace{7cm} \LARGE{Gas Turbine CO Emission Analysis}
-author: "Aayushi Gupta, Kyle Kaminski, Rosa Lin, Ruben Martinez"
+  | \vspace{7cm} Gas Turbine CO Emission Analysis
+subtitle: "Group 10 Consulting Project Report"
+author: 
+  - "Aayushi Gupta, Kyle Kaminski, Rosa Lin, Ruben Martinez"
 date: 'Client: Darren Glosemeyer'
 output:
   pdf_document:
