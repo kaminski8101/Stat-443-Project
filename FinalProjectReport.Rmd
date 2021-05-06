@@ -26,7 +26,6 @@ library(tree)
 library(knitr)
 library(faraway)
 library(kableExtra)
-
 # Create RMSE function
 RMSE <- function(y, y_hat) {
   rmse <- sqrt(sum(((y_hat - y)^2)/length(y)))
@@ -113,19 +112,16 @@ details in Appendices 1):
 -   CO - Carbon Monoxide
 -   NOX - Nitrogen Oxide (Removed from data)
 
-\newpage
 
 Here's a quick peek at the data set:
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 gt_2015 <- read_csv("Project Data/gt_2015.csv")
-
 # Fix or remove problematic observations (this will be explained later)
 gt_2015[c(1363,1364,1585,3977,3978,4762,5752,5753,6901),10] <- gt_2015[c(1363,1364,1585,3977,3978,4762,5752,5753,6901),10] / 10
 gt_2015 <- gt_2015[-c(1796,1713,1712,1711,1710,1709,1301,1009,626,121,120,119,118,117,116,115),]
 gt_2015_typical <- gt_2015[gt_2015$TEY <= 134.5 & gt_2015$TEY >= 127,]
 gt_2015_high <- gt_2015[gt_2015$TEY >= 160,]
-
 # Display table
 knitr::kable(head(gt_2015)[,])
 ```
@@ -138,14 +134,12 @@ knitr::kable(head(gt_2015)[,])
 set.seed(443)
 # Set 5-fold cross validation
 cv_5 <- trainControl(method = "cv", number = 5)
-
 train_all <- gt_2015 %>% dplyr::select(-NOX) %>% sample_frac(0.8)
 test_all <- gt_2015 %>% dplyr::select(-NOX) %>% setdiff(train_all)
 train_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% sample_frac(0.8)
 test_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% setdiff(train_typical)
 train_high <- gt_2015_high %>% dplyr::select(-NOX) %>% sample_frac(0.8)
 test_high <- gt_2015_high %>% dplyr::select(-NOX) %>% setdiff(train_high)
-
 # AIC stepwise selected linear models
 all_linear_mod <- train(
           form = CO ~ . - TIT - CDP - TEY ,
@@ -174,7 +168,6 @@ high_linear_mod_lm <- lm(CO ~ AT + AFDP + GTEP + TIT + TAT, data =  test_high)
 linear_pred_all <- predict(all_linear_mod_lm, test_all)
 linear_pred_typical <- predict(typical_linear_mod_lm, test_typical)
 linear_pred_high <- predict(high_linear_mod_lm, test_high)
-
 # Lasso models
 all_lasso_mod <- train(
           form = CO ~ . - TIT - CDP - TEY ,
@@ -197,7 +190,6 @@ high_lasso_mod <- train(
 lasso_pred_all <- predict(all_lasso_mod, test_all)
 lasso_pred_typical <- predict(typical_lasso_mod, test_typical)
 lasso_pred_high <- predict(high_lasso_mod, test_high)
-
 # Decision Trees
 tree_CO_all <- tree(CO ~ . , train_all,
                   control = tree.control(nobs = length(train_all$CO),
@@ -220,18 +212,21 @@ tree_pred_high <- predict(pruned_tree_high, test_high)
 
 ### Pairwise Correlations
 
-   
+&nbsp;  
+&nbsp;  
+
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 pairs(gt_2015, pch = 20, cex = 0.25, main = "Figure 1: Pairwise Correlation Plot")
 ```
 
-   
+&nbsp;  
+&nbsp;  
+
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE, results='asis'}
 knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables") %>%
 kable_styling(latex_options = c("hold_position"))
-
 ```
 
 The exploratory analysis shows possible linear relationships between the
@@ -249,7 +244,10 @@ production range which looks at data connected to energy yields from 130
 to 136, and a high production range that looks at data connected to
 energy yields higher than 160.
 
-   
+
+&nbsp;  
+&nbsp;  
+
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 d = density(gt_2015$TEY)
@@ -257,7 +255,6 @@ plot(d, xlab = "Turbine Energy Yield", ylab = "Density", main = "Figure 2: Turbi
 axis(1,at = c(127, 134.5), cex.axis = .7, lwd = (1), col.ticks = "red")
 polygon(d, col = "blue4", border = "chocolate1")
 abline(v = c(127,134.5,160), lty = c(1,1,2), col = c("red","red","black"))
-
 ```
 
 The typical production range the client provided did not fully capture
@@ -272,11 +269,13 @@ turbine energy yield.
 
 ### Carbon Monoxide Extreme Values
 
-   
+
+&nbsp;  
+&nbsp;  
+
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 original_data <- read_csv("Project Data/gt_2015.csv")
-
 plot(original_data$CO, xlab = "Index", ylab = "CO", main = "Figure 3: Extreme CO Values",
      pch = 20, col = "blue")
 abline(h = 15, lty = 1, col = "red")
@@ -292,7 +291,10 @@ appropriately dealing with the observations that fell into each
 category, we found the CO values to be much more reasonable as is
 evident in Figure 4.
 
-   
+
+&nbsp;  
+&nbsp;  
+   
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 plot(gt_2015$CO, xlab = "Index", ylab = "CO", main = "Figure 4: CO Values",
@@ -362,11 +364,9 @@ overall.
 all_linear_rmse     <- RMSE(test_all$CO, linear_pred_all)
 typical_linear_rmse <- RMSE(test_typical$CO, linear_pred_typical)
 high_linear_rmse    <- RMSE(test_high$CO, linear_pred_high)
-
 all_lass_rmse     <- RMSE(test_all$CO, lasso_pred_all)
 typical_lass_rmse <- RMSE(test_typical$CO, lasso_pred_typical)
 high_lass_rmse    <- RMSE(test_high$CO, lasso_pred_high)
-
 all_tree_rmse     <- RMSE(test_all$CO, tree_pred_all)
 typical_tree_rmse <- RMSE(test_typical$CO, tree_pred_typical)
 high_tree_rmse    <- RMSE(test_high$CO, tree_pred_high)
@@ -562,7 +562,11 @@ tree is used.
 
 $$\textrm{Gini}(K) = \sum_{i \in N} P_{i,K}(1-P_{i,K}) = 1 - \sum_{i \in N} P^2_{i,K}$$
 [[**Source**]](https://medium.com/the-owl/k-fold-cross-validation-in-keras-3ec4a3a00538)
-
+  
+  
+\newpage  
+  
+   
 ## 5. Model Training and Testing Procedure
 
 All of our models were built following the same procedure. We first
@@ -580,7 +584,7 @@ model and the final subset to test the models performance. The k
 different models built are then averaged together to a single model
 which does not overfit our training data. The figure below visually
 illustrates the process that we followed.
-
+  
 ```{=tex}
 \begin{figure}[H]
 \centering
@@ -614,34 +618,25 @@ that caused issues in linear based models.
 full_model_all     = lm(CO ~ . - NOX, data = gt_2015)
 full_model_typical = lm(CO ~ . - NOX, data = gt_2015_typical)
 full_model_high    = lm(CO ~ . - NOX, data = gt_2015_high)
-
 invisible(vif(full_model_all))
 invisible(vif(full_model_typical))
 invisible(vif(full_model_high))
-
 second_model_all     = lm(CO ~ . - NOX - TIT, data = gt_2015)
 second_model_typical = lm(CO ~ . - NOX - TIT, data = gt_2015_typical)
 second_model_high    = lm(CO ~ . - NOX - TEY, data = gt_2015_high)
-
 invisible(vif(second_model_all))
 invisible(vif(second_model_typical))
 invisible(vif(second_model_high))
-
 third_model_all     = lm(CO ~ . - NOX - TIT - CDP, data = gt_2015)
 third_model_typical = lm(CO ~ . - NOX - TIT - AT, data = gt_2015_typical)
 third_model_high    = lm(CO ~ . - NOX - TEY - CDP, data = gt_2015_high)
-
 invisible(vif(third_model_all))
 invisible(vif(third_model_typical))
 invisible(vif(third_model_high))
-
 initial_typical_linear_model <- third_model_typical
 initial_high_linear_model    <- third_model_high
-
 fourth_model_all     = lm(CO ~ . - NOX - TIT - CDP - TEY, data = gt_2015)
-
 invisible(vif(fourth_model_all))
-
 initial_all_linear_model <- fourth_model_all
 ```
 
@@ -684,17 +679,23 @@ $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 [[**Source**]](https://www.geeksforgeeks.org/python-pearson-correlation-test-between-two-variables/)
 
 
+\newpage
+
 
 ## 8. Carbon Monoxide Extreme Values
 
+
+&nbsp;  
+&nbsp;  
+
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # 115,116,117,118,119,120,121,626,1009,1301,1709,1710,1711,1712,1713,1796
-
 original_data[c(seq(1009-4,1009+4)),-11] %>%
   kable(booktabs = T) %>%
   row_spec(5, bold = T, background = "yellow")
 ```
-
+  
 The first relationship that we found between observations with extreme
 CO values was a shock to their TIT, TAT, and TEY values. In the figure
 above, the row with an extreme CO value is highlighted in yellow.
@@ -713,15 +714,18 @@ are likely heavily influenced by some outside factor not accounted for
 in our data. Therefore, we chose to remove the observations which fit
 this explanation. 16 observations were removed.
 
+   
+&nbsp;  
+&nbsp;  
+
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 # 1363,1364,1585,3977,3978,4762,5752,5753,6901
-
 original_data[c(seq(3977-3,3977+4)),-11] %>%
   kable(booktabs = T) %>%
   row_spec(c(4,5), bold = T, background = "yellow")
 ```
-
+  
 The observations that had high CO values but did not show any evidence
 of a shock to the process variables all indicated a different
 relationship. The figure above shows an example of two observations,
@@ -738,6 +742,10 @@ have accidentally made this error. We decided to change the observations
 which fit this explanation by dividing them by 10. There were 9
 observations that were impacted by this.
 
+
+\newpage
+
+
 ## 9. Individual Contributions
 
 **Aayushi**
@@ -746,7 +754,9 @@ observations that were impacted by this.
 
 **Kyle**
 
--   
+- Built/trained the different decision tree models used in the analysis.  
+- Dealt with the observations that had extreme CO values in the original data (Appendix 8).   
+- Contributed to writing several different sections the report.  
 
 **Rosa**
 
