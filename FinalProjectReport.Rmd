@@ -756,7 +756,8 @@ observations that were impacted by this.
 
 - Built/trained the different decision tree models used in the analysis.  
 - Dealt with the observations that had extreme CO values in the original data (Appendix 8).   
-- Contributed to writing several different sections the report.  
+- Contributed to writing several different sections in the report.
+- Created some of the figures used in the report. 
 
 **Rosa**
 
@@ -764,4 +765,9 @@ observations that were impacted by this.
 
 **Ruben**
 
--   
+- Built/trained the linear and lasso models used in the analysis.
+
+- Performed some preliminary data exploration including some dimension reduction and data description.
+
+- Contributed to writing several different sections in the report. 
+- Created some of the figures used in the report. 
