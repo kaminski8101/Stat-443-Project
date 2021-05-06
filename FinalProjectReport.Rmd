@@ -750,7 +750,10 @@ observations that were impacted by this.
 
 **Aayushi**
 
--   
+- Built/trained initial linear models.
+- Formatted final report.
+- Contributed to writing several different sections in the report.
+- Created some of the figures used in the report. 
 
 **Kyle**
 
