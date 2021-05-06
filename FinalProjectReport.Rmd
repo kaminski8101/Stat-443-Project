@@ -231,7 +231,7 @@ knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between V
 kable_styling(latex_options = c("hold_position"))
 ```
 
-The exploratory analysis shows possible linear relationships between the
+The exploratory analysis showed possible linear relationships between the
 response variable CO and the feature variables: CDP, TEY, TIT, GTEP and
 AFDP. The analysis indicates possible collinearity between some of the
 feature variables (TIT, CDP, and TEY). This could cause some problems in
@@ -330,7 +330,7 @@ Regression**, **Lasso**, and **Decision Trees**.
 In order to determine which model was the most effective, we compared
 the RMSE of multiple linear regression, lasso, and decision tree models.
 Root Mean Squared Errors are the standard deviation of residuals. We
-calculate the RMSE to measure how spread out these variables are. The
+calculated the RMSE to measure how spread out these variables are. The
 rule of thumb is, the lower the RMSE, the better.
 
 ### Training and Testing Data
@@ -494,8 +494,8 @@ process variables for the high production range (160+):
 2.  Ensure the typical production range that was supplied to us is the
     correct range.
 
-3.  Client should make sure all data is entered correctly and note any
-    events which require the turbines to shut down.
+3.  Confirm all data is entered correctly and note any events that required
+    turbines to shut down. 
 
 \newpage
 
@@ -714,7 +714,7 @@ amounts of CO. These observations are not relevant to analyzing which
 process variables are directly related to CO output as their CO values
 are likely heavily influenced by some outside factor not accounted for
 in our data. Therefore, we chose to remove the observations which fit
-this explanation. 16 observations were removed.
+this explanation. 16 observations were removed as a result of this. 
 
    
 &nbsp;  
