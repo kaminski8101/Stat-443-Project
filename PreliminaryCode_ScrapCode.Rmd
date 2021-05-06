@@ -1,0 +1,529 @@
+---
+title: "Gas Turbine CO Emission Analysis"
+author: "Aayushi Gupta, Kyle Kaminski, Rosa Lin, Ruben Martinez"
+date: ""
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+library(readr) 
+gt_2015 <- read_csv("Project Data/gt_2015.csv")
+gt_2015_typical <- gt_2015[gt_2015$TEY <= 134.5 & gt_2015$TEY >= 127,]
+gt_2015_high <- gt_2015[gt_2015$TEY >= 160,]
+knitr::kable(head(gt_2015)[,])
+knitr::kable(head(gt_2015_typical)[,])
+knitr::kable(head(gt_2015_high)[,])
+```
+
+Here's some descriptive statistics of the data set:
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+summary(gt_2015)
+summary(gt_2015_typical)
+summary(gt_2015_high)
+```
+
+
+Figure 1: Scatterplot Matrices to decide which feature variables have a linear relationship 
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+pairs(gt_2015, pch = 20, cex = 0.25)
+pairs(gt_2015_typical, pch = 20, cex = 0.25)
+pairs(gt_2015_high, pch = 20, cex = 0.25)
+
+```
+
+Figure 2: 
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+knitr::kable(cor(gt_2015), digits = 2, caption = "Pairwise Correlation Between Variables (All Data)")
+knitr::kable(cor(gt_2015_typical), digits = 2, caption = "Pairwise Correlation Between Variables (Typical Energy Yield)")
+knitr::kable(cor(gt_2015_high), digits = 2, caption = "Pairwise Correlation Between Variables (High Energy Yield)")
+```
+
+Remove variables that are highly correlated.
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+#vif 
+library(faraway)
+full_model_all     = lm(CO ~ . - NOX, data = gt_2015)
+full_model_typical = lm(CO ~ . - NOX, data = gt_2015_typical)
+full_model_high    = lm(CO ~ . - NOX, data = gt_2015_high)
+
+invisible(vif(full_model_all    ))
+invisible(vif(full_model_typical))
+invisible(vif(full_model_high   ))
+
+second_model_all     = lm(CO ~ . - NOX - TIT, data = gt_2015)
+second_model_typical = lm(CO ~ . - NOX - TIT, data = gt_2015_typical)
+second_model_high    = lm(CO ~ . - NOX - TEY, data = gt_2015_high)
+
+invisible(vif(second_model_all    ))
+invisible(vif(second_model_typical))
+invisible(vif(second_model_high   ))
+
+third_model_all     = lm(CO ~ . - NOX - TIT - CDP, data = gt_2015)
+third_model_typical = lm(CO ~ . - NOX - TIT - AT, data = gt_2015_typical)
+third_model_high    = lm(CO ~ . - NOX - TEY - CDP, data = gt_2015_high)
+
+invisible(vif(third_model_all    ))
+invisible(vif(third_model_typical))
+invisible(vif(third_model_high   ))
+
+initial_typical_linear_model <- third_model_typical
+initial_high_linear_model    <- third_model_high
+
+fourth_model_all     = lm(CO ~ . - NOX - TIT - CDP - TEY, data = gt_2015)
+
+invisible(vif(fourth_model_all))
+
+initial_all_linear_model <- fourth_model_all
+
+vif(initial_all_linear_model)
+vif(initial_typical_linear_model)
+vif(initial_high_linear_model)
+
+```
+
+
+#density 
+```{r}
+d <- density(gt_2015$TEY)
+plot(d, xlab = "Turbine Energy Yield", ylab = "Density", main = "Turbnine Energy Yield Distribution")
+polygon(d, col = "blue4", border = "chocolate1")
+abline(v = c(127,134.5,160), lty = c(1,1,2), col = c("red","red","black"))
+```
+
+
+# Find and fix/remove ouliers
+```{r}
+# plot(gt_2015$CO)
+# abline(h = 15)
+
+# which(gt_2015$CO > 15)
+# 
+# gt_2015[c(seq(119-6,119+4)),]
+
+gt_2015[c(1363,1364,1585,3977,3978,4762,5752,5753,6901),10] <- gt_2015[c(1363,1364,1585,3977,3978,4762,5752,5753,6901),10] / 10
+
+# gt_2015[c(1363,1364,1585,3977,3978,4762,5752,5753,6901),]
+
+
+gt_2015 <- gt_2015[-c(1796,1713,1712,1711,1710,1709,1301,1009,626,121,120,119,118,117,116,115),]
+# which(gt_2015$CO > 15)
+
+# plot(gt_2015$CO)
+
+gt_2015_typical <- gt_2015[gt_2015$TEY <= 134.5 & gt_2015$TEY >= 127,]
+gt_2015_high <- gt_2015[gt_2015$TEY >= 160,]
+```
+
+
+# Methods
+
+
+```{r include=FALSE}
+full_model = lm(CO ~ ., data = gt_2015)
+linear_model = lm(CO ~ .-NOX - TIT - CDP - TEY, data = gt_2015)
+summary(linear_model)
+#picking a new variable to test 
+AT_model = lm(CO ~ AT, data = gt_2015)
+AP_model = lm(CO ~ AP, data = gt_2015)
+AH_model = lm(CO ~ AH, data = gt_2015)
+AFDP_model = lm(CO ~ AFDP, data = gt_2015)
+GTEP_model = lm(CO ~ GTEP, data = gt_2015)
+TAT_model = lm(CO ~ TAT, data = gt_2015)
+BIC(AT_model)
+BIC(AP_model)
+BIC(AH_model)
+BIC(AFDP_model) #second best 
+BIC(GTEP_model)
+BIC(TAT_model)
+BIC(linear_model) #this is the best model 
+
+library(MASS)
+
+n = length(resid(linear_model))
+BIC_model = step(linear_model, direction = "backward", k = log(n))
+coef(BIC_model)
+stepAIC(linear_model, direction = "backward")
+
+vector <- c(BIC(AT_model), BIC(AP_model), BIC(AH_model), BIC(AFDP_model), BIC(GTEP_model), BIC(TAT_model))
+
+library(ggplot2)
+df <- data.frame(vector = c(BIC(AT_model), BIC(AP_model), BIC(AH_model), BIC(AFDP_model), BIC(GTEP_model), BIC(TAT_model)), names = c ("AT", "AP", "AH", "AFDP", "GTEP", "TAT"))
+ggplot(data = df, aes(x = names, y = vector), ylim = c(0, 50000)) + geom_bar(stat = "identity")
+barplot(vector, main = "BIC values", xlab = "Variables",ylab = "Values", names.arg = c("AT", "AP", "AH", "AFDP", "GTEP", "TAT"), col = "gray", ylim = c(0, 45000))
+```
+
+
+## Linear and Lasso stepwise AIC Models
+```{r include=FALSE}
+library(caret)
+#5-fold cross validation
+cv_5 <- trainControl(method = "cv", number = 5)
+```
+
+
+#All Data
+```{r include=FALSE}
+set.seed(10)
+#AIC stepwise selected linear model 
+all_linear_mod <- train(
+          form = CO ~ . - NOX - TIT - CDP - TEY ,
+          data = gt_2015,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+all_linear_mod_lm <- lm(CO ~ AT + AH + AFDP + GTEP + TAT, data = gt_2015)
+
+
+#Lasso model
+all_lasso_mod <- train(
+          form = CO ~ . - NOX - TIT - CDP - TEY ,
+          data = gt_2015,
+          method = "lasso",
+          trControl = cv_5
+)
+```
+
+#Typical Energy Yield (127-134.5)
+```{r include=FALSE}
+set.seed(10)
+#AIC stepwise selected linear model 
+typical_linear_mod <- train(
+          form = CO ~ . - NOX - TIT - AT,
+          data = gt_2015_typical,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+typical_linear_mod_lm <- lm(CO ~ AP + AH + AFDP + GTEP + TAT + TEY + CDP, data = gt_2015_typical)
+
+
+#Lasso model
+typical_lasso_mod <- train(
+          form = CO ~ . - NOX - TIT - AT,
+          data = gt_2015_typical,
+          method = "lasso",
+          trControl = cv_5
+)
+```
+
+#High Energy Yield (160+)
+```{r include=FALSE}
+set.seed(10)
+
+#AIC stepwise selected linear model 
+high_linear_mod <- train(
+          form = CO ~ . - NOX - TEY - CDP,
+          data = gt_2015_high,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          trace = FALSE
+)
+high_linear_mod_lm <- lm(CO ~ AT + AFDP + GTEP + TIT + TAT, data =  gt_2015_high)
+
+
+#Lasso model
+high_lasso_mod <- train(
+          form = CO ~ . - NOX - TEY - CDP,
+          data = gt_2015_high,
+          method = "lasso",
+          trControl = cv_5
+)
+```
+
+
+#Box-Cox Lambdas
+```{r}
+all_lambda <- boxcox(all_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(all_linear_mod_lm, plotit = FALSE)$y)]
+typical_lambda <- boxcox(typical_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(typical_linear_mod_lm, plotit = FALSE)$y)]
+high_lambda <- boxcox(high_linear_mod_lm, plotit = FALSE)$x[which.max(boxcox(high_linear_mod_lm, plotit = FALSE)$y)]
+```
+
+#Box-Cox Transformed Models
+```{r}
+#All Data Box-Cox Transformed Linear Model
+set.seed(10)
+all_bc_linear_mod <- train(
+          form = CO^(.2) ~ . - NOX  - TIT - CDP - TEY ,
+          data = gt_2015,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          nvmax = 10,
+          trace = FALSE
+)
+all_bc_linear_mod_lm <- lm(CO^(.2) ~ AT + AP + AH + AFDP + GTEP + TAT, data = gt_2015)
+plot(all_bc_linear_mod$finalModel)
+
+#Typical Data Box-Cox Transformed Linear Model
+typical_bc_linear_mod <- train(
+          form = CO^(.6) ~ . - NOX - TIT - AT,
+          data = gt_2015_typical,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          nvmax = 10,
+          trace = FALSE
+)
+typical_bc_linear_mod_lm <- lm(CO^(.6) ~ AP + AH + AFDP + GTEP + TAT + TEY + CDP, data = gt_2015_typical)
+plot(typical_bc_linear_mod$finalModel)
+
+#High Data Box-Cox Transformed Linear Model
+high_bc_linear_mod <- train(
+          form = CO^(1.9) ~ . - NOX - TEY - CDP,
+          data = gt_2015_high,
+          method = "lmStepAIC",
+          trControl = cv_5,
+          nvmax = 10,
+          trace = FALSE
+)
+high_bc_linear_mod_lm <- lm(CO^(1.9) ~ AT + AFDP + GTEP + TIT + TAT, data =  gt_2015_high)
+plot(typical_bc_linear_mod$finalModel)
+```
+
+
+#Results
+```{r }
+all_linear_mod$results
+all_bc_linear_mod$results
+all_lasso_mod$results
+
+typical_linear_mod$results
+typical_bc_linear_mod$results
+typical_lasso_mod$results
+
+high_linear_mod$results
+high_bc_linear_mod$results
+high_lasso_mod$results
+```
+
+#plots
+```{r }
+plot(all_linear_mod$finalModel)
+plot(all_bc_linear_mod$finalModel)
+plot(all_lasso_mod$finalModel)
+
+plot(typical_linear_mod$finalModel)
+plot(typical_bc_linear_mod$finalModel)
+plot(typical_lasso_mod$finalModel)
+
+plot(high_linear_mod$finalModel)
+plot(high_bc_linear_mod$finalModel)
+plot(high_lasso_mod$finalModel)
+```
+
+#Outlier Search
+```{r}
+# plot(cooks.distance(all_linear_mod$finalModel))
+# plot(cooks.distance(typical_linear_mod$finalModel))
+# plot(cooks.distance(high_linear_mod$finalModel))
+# 
+# which(cooks.distance(all_linear_mod$finalModel) > .02)
+# which(cooks.distance(typical_linear_mod$finalModel) > .1)
+# which(cooks.distance(high_linear_mod$finalModel) > .2)
+
+
+
+# plot(cooks.distance(all_bc_linear_mod$finalModel))
+# plot(cooks.distance(typical_bc_linear_mod$finalModel))
+# plot(cooks.distance(high_bc_linear_mod$finalModel))
+# 
+# which(cooks.distance(all_bc_linear_mod$finalModel) > .01)
+# which(cooks.distance(typical_bc_linear_mod$finalModel) > .1)
+# which(cooks.distance(high_bc_linear_mod$finalModel) > .2)
+```
+
+
+## Decision Trees
+#All Data
+```{r load-packages-and-create-RMSE-function}
+# install.packages('tree')
+library(tidyverse)
+library(tree)
+
+RMSE <- function(y, y_hat) {
+  rmse <- sqrt(sum(((y_hat - y)^2)/length(y)))
+  print(rmse)
+}
+```
+```{r train-and-test-split}
+set.seed(10)
+train <- gt_2015 %>% dplyr::select(-NOX) %>% sample_frac(0.8)
+test <- gt_2015 %>% dplyr::select(-NOX) %>% setdiff(train)
+```
+```{r create-big-tree}
+tree_CO <- tree(CO ~ . , train, 
+                  control = tree.control(nobs = length(train$CO), 
+                                         minsize = 4, mindev=0.001), method = "recursive.partition")
+summary(tree_CO)
+```
+```{r plot-big-tree}
+plot(tree_CO)
+text(tree_CO, pretty = 0)
+```
+```{r use-tree-on-test-data-and-calculate-RMSE}
+tree_pred <- predict(tree_CO, test)
+RMSE(test$CO, tree_pred)
+```
+```{r plot-cross-validated-RMSE-against-terminal-node-size}
+cv_info <- cv.tree(tree_CO, FUN = prune.tree) 
+plot(cv_info$size, sqrt(cv_info$dev / nrow(train)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
+```
+```{r prune-tree-to-11-terminal-nodes}
+pruned_tree <- prune.tree(tree_CO, best = 8)
+summary(pruned_tree)
+```
+```{r plot-pruned-tree}
+plot(pruned_tree)
+text(pruned_tree, pretty = 0)
+```
+```{r calculate-pruned-tree-RMSE}
+tree_pred <- predict(pruned_tree, test)
+RMSE(test$CO, tree_pred)
+```
+```{r}
+plot(tree_pred, test$CO, xlab = "Predicted", ylab = "Actual")
+abline(0, 1)
+```
+
+
+#Typical Energy Yield (127-134.5)
+```{r}
+set.seed(10)
+train_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% sample_frac(0.8)
+test_typical <- gt_2015_typical %>% dplyr::select(-NOX) %>% setdiff(train_typical)
+```
+```{r}
+tree_CO_typical <- tree(CO ~ . , train_typical,
+                        control = tree.control(nobs = length(train_typical$CO), 
+                                         minsize = 4, mindev=0.001), method = "recursive.partition")
+summary(tree_CO_typical)
+```
+```{r}
+plot(tree_CO_typical)
+text(tree_CO_typical, pretty = 0)
+```
+```{r}
+tree_pred_typical <- predict(tree_CO_typical, test_typical)
+RMSE(test_typical$CO, tree_pred_typical)
+```
+```{r}
+cv_info_typical <- cv.tree(tree_CO_typical, FUN = prune.tree) 
+plot(cv_info_typical$size, sqrt(cv_info_typical$dev / nrow(train_typical)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
+```
+```{r}
+pruned_tree_typical <- prune.tree(tree_CO_typical, best = 7)
+summary(pruned_tree_typical)
+```
+```{r}
+plot(pruned_tree_typical)
+text(pruned_tree_typical, pretty = 0)
+```
+```{r}
+tree_pred_typical <- predict(pruned_tree_typical, test_typical)
+RMSE(test_typical$CO, tree_pred_typical)
+```
+```{r}
+plot(tree_pred_typical, test_typical$CO, xlab = "Predicted", ylab = "Actual")
+abline(0, 1)
+```
+
+
+#High Energy Yield (160+)
+```{r train-and-test-split-high}
+set.seed(10)
+train_high <- gt_2015_high %>% dplyr::select(-NOX) %>% sample_frac(0.8)
+test_high <- gt_2015_high %>% dplyr::select(-NOX) %>% setdiff(train_high)
+```
+```{r create-big-tree-high}
+tree_CO_high <- tree(CO ~ . , train_high,
+                     control = tree.control(nobs = length(train_high$CO), 
+                                         minsize = 4, mindev=0.001), method = "recursive.partition")
+summary(tree_CO_high)
+```
+```{r plot-big-tree-high}
+plot(tree_CO_high)
+text(tree_CO_high, pretty = 0)
+```
+```{r use-tree-on-test-data-and-calculate-RMSE-high}
+tree_pred_high <- predict(tree_CO_high, test_high)
+RMSE(test_high$CO, tree_pred_high)
+```
+```{r plot-cross-validated-RMSE-against-terminal-node-size-high}
+cv_info_high <- cv.tree(tree_CO_high, FUN = prune.tree) 
+plot(cv_info_high$size, sqrt(cv_info_high$dev / nrow(train_high)), type = "b", xlab = "Number of Terminal Nodes", ylab = "RMSE", main = "Decision Tree Cross Validation")
+```
+```{r prune-tree-to-6-terminal-nodes-high}
+pruned_tree_high <- prune.tree(tree_CO_high, best = 6)
+summary(pruned_tree_high)
+```
+```{r plot-pruned-tree-high}
+plot(pruned_tree_high)
+text(pruned_tree_high, pretty = 0)
+```
+```{r calculate-pruned-tree-RMSE-high}
+tree_pred_high <- predict(pruned_tree_high, test_high)
+RMSE(test_high$CO, tree_pred_high)
+```
+```{r}
+plot(tree_pred_high, test_high$CO, xlab = "Predicted", ylab = "Actual")
+abline(0, 1)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+library(knitr)
+all_linear_rmse     <- all_linear_mod$results$RMSE
+typical_linear_rmse <- typical_linear_mod$results$RMSE
+high_linear_rmse    <- high_linear_mod$results$RMSE
+
+all_lass_rmse     <- max(all_lasso_mod$results$RMSE)
+typical_lass_rmse <- max(typical_lasso_mod$results$RMSE)
+high_lass_rmse    <- max(high_lasso_mod$results$RMSE)
+
+all_tree_rmse     <- RMSE(test$CO, tree_pred)
+typical_tree_rmse <- RMSE(test_typical$CO, tree_pred_typical)
+high_tree_rmse    <- RMSE(test_high$CO, tree_pred_high)
+
+bc_all_rmse     <- all_bc_linear_mod$results$RMSE
+bc_typical_rmse <- typical_bc_linear_mod$results$RMSE
+bc_high_rmse    <- high_bc_linear_mod$results$RMSE
+
+  
+
+RMSE_Table <- matrix(c(round(all_linear_mod$results$RMSE        ,digits = 4),
+                       round(typical_linear_mod$results$RMSE    ,digits = 4),
+                       round(high_linear_mod$results$RMSE       ,digits = 4),
+                       round(all_bc_linear_mod$results$RMSE     ,digits = 4),
+                       round(typical_bc_linear_mod$results$RMSE ,digits = 4),
+                       round(high_bc_linear_mod$results$RMSE    ,digits = 4),
+                       round(max(all_lasso_mod$results$RMSE)    ,digits = 4),
+                       round(max(typical_lasso_mod$results$RMSE),digits = 4),
+                       round(max(high_lasso_mod$results$RMSE)   ,digits = 4),
+                       round(all_tree_rmse                      ,digits = 4),
+                       round(typical_tree_rmse                  ,digits = 4),
+                       round(high_tree_rmse                     ,digits = 4 )) 
+                     ,ncol=3, byrow=TRUE)
+colnames(RMSE_Table) <- c("Overall Production Range", "Typical Production Range (127-134.5)", "High Production Range (160+)")
+rownames(RMSE_Table) <- c("Linear Regression", "Box-Cox Transformed", "Lasso", "Decision Tree" )
+RMSE_Table <- as.table(RMSE_Table)
+RMSE_Table <- kable(RMSE_Table)
+RMSE_Table
+```
+
