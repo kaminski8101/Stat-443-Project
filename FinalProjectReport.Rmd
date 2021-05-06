@@ -687,14 +687,11 @@ $$r = \frac{\sum(x-m_x)(y-m_y)}{\sqrt{\sum(x-m_x)^2\sum(y-m_y)^2}}$$
 
 ## 8. Carbon Monoxide Extreme Values
 
-\newpage
-
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # 115,116,117,118,119,120,121,626,1009,1301,1709,1710,1711,1712,1713,1796
 
 original_data[c(seq(1009-4,1009+4)),-11] %>%
   kable(booktabs = T) %>%
-  kable_styling() %>%
   row_spec(5, bold = T, background = "yellow")
 ```
 
@@ -716,16 +713,12 @@ are likely heavily influenced by some outside factor not accounted for
 in our data. Therefore, we chose to remove the observations which fit
 this explanation. 16 observations were removed.
 
-   
-
-\newpage
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 # 1363,1364,1585,3977,3978,4762,5752,5753,6901
 
 original_data[c(seq(3977-3,3977+4)),-11] %>%
   kable(booktabs = T) %>%
-  kable_styling() %>%
   row_spec(c(4,5), bold = T, background = "yellow")
 ```
 
