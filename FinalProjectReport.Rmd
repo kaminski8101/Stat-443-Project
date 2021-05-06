@@ -776,4 +776,8 @@ observations that were impacted by this.
 - Built/trained the linear and lasso models used in the analysis.  
 - Performed some preliminary data exploration including some dimension reduction and data description.  
 - Contributed to writing several different sections in the report.  
+<<<<<<< HEAD
 - Created some of the figures used in the report.  
+=======
+- Created some of the figures used in the report.  
+>>>>>>> 2b6bfff4703a5116608b359c5e6eb055a263abc7
